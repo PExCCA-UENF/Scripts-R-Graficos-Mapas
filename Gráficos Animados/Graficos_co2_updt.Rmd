@@ -7,7 +7,7 @@ output: html_document
 
 ### Instalação e importação dos pacotes
 
-Instlação de pacotes
+#### Instalação de pacotes
 
 ```{r instalação}
 install.packages("tidyverse")
@@ -24,7 +24,7 @@ install.packages("zoo")
 install.packages("htmlwidgets")
 ```
 
-Importação de pacotes
+#### Importação de pacotes
 
 ```{r importação}
 library(tidyverse)
@@ -45,7 +45,18 @@ library(zoo)   # extrai colunas de meses da série temporal
 library(htmlwidgets)
 ```
 
-### Importando e analisando o dataframe CO2 do pacote data()
+### Sobre o pacote `gganimate`
+
+![](Images/gganimate.png){width="13%"} O pacote `gganimate` estende as funções do `ggplot2` para gráficos animados. A gramática do `gganimate` é totalmente compatível com o `ggplot2` e permite especificar transições e animações de maneira flexível e extensível.
+
+Intro às funções: A documentação da função `animate()` descreve como especificar como a animação é renderizada, enquanto a documentação para as diferentes funções de transição, por exemplo, `transition_states()`, descreve como declarar a animação.
+
+```{r Pacote gganimate}
+help("gganimate")
+ls("package:gganimate")
+```
+
+### Importando e analisando o dataframe co2 da função `data()`
 
 ```{r importando e analisando co2}
 
@@ -137,6 +148,10 @@ getwd()
 setwd()
 ```
 
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Daqui pra frente é um registro das tentativas e erros com os gráficos iniciais.
+
 ### Criando gráficos
 
 #### gr
@@ -153,7 +168,7 @@ gr <- ggplot(co2_df, aes(x=ANO, y=CO2, colour = CO2)) +
 
 
 print(gr)
-ggplotly(gr)  #error in dirname(to): path too long | O PROBLEMA É POR CAUSA DO MARKDOWN, NOT SURE WHY, MAS NO FORMATO R SCRIP RODA NORMAL
+ggplotly(gr)  #error in dirname(to): path too long | O PROBLEMA É POR CAUSA DO MARKDOWN, NOT SURE WHY, MAS NO FORMATO R SCRIPT RODA NORMAL
 ```
 
 ```{r gráfico animado simples do gr}
