@@ -1,1 +1,0 @@
-# Espiral Climática
