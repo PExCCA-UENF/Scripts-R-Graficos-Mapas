@@ -1,0 +1,237 @@
+---
+title: "Graficos_co2"
+author: "Camila"
+date: "2022-09-08"
+output: html_document
+---
+
+### Instalação e importação dos pacotes
+
+Instlação de pacotes
+
+```{r instalação}
+install.packages("tidyverse")
+install.packages("tidyr")
+install.packages("ggplot2")
+install.packages("plotly") # para graficos interativos
+install.packages("gganimate")
+install.packages("gifski")  # salva animações em gif
+install.packages("av")  # salva animações em vídeo
+
+install.packages("timetk")
+install.packages("zoo")
+
+install.packages("htmlwidgets")
+```
+
+Importação de pacotes
+
+```{r importação}
+library(tidyverse)
+library(dplyr)
+library(ggthemes)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(gganimate)
+library(gifski)
+library(av)
+
+library(RColorBrewer)
+
+library(timetk)  # transforma em tibble
+library(zoo)   # extrai colunas de meses da série temporal
+
+library(htmlwidgets)
+```
+
+### Importando e analisando o dataframe CO2 do pacote data()
+
+```{r importando e analisando co2}
+
+data() # queremos o df: co2 | Mauna Loa Atmospheric CO2 Concentration
+
+help("co2")
+data("co2")
+
+View(co2)
+str(co2)
+
+# co2 está em formato Time-Series ts()
+is.ts(co2) # verifica se co2 é uma série temporal
+```
+
+```{r gráfico básico de co2 como time-series}
+plot.ts(co2)
+```
+
+```{r}
+co2  # 38 linhas (1959-1997) | 12 colunas (Jan-Dez)
+```
+
+```{r Decompose co2}
+help("decompose")
+
+# Decomposição de séries temporais: observa-se a tendência, sazonalidade e o componente aleatória.
+co2_decomp <- decompose(co2) 
+plot(co2_decomp)
+
+# é possível observar os as diferentes análises separadamente
+plot(co2_decomp$trend)
+
+plot(co2_decomp$seasonal)
+```
+
+### Convertendo o co2 de Time-Series para tibble e data.frame
+
+#### FORMAS DE PASSAR O TS PARA OUTROS FORMATOS - DICAS NÍCOLAS
+
+Quando convertemos `co2` (`time-series`) em `data.frame` diretamente, as informações referentes às colunas (meses) e linhas (anos) não são incluídas no resultado, ao invés disso obtemos uma única coluna `x` com os valores das taxas de co2.
+
+```{r}
+as.data.frame(co2) %>% View()
+```
+
+Porém, como vimos, o `Time-Series` `co2` possui informações temporais referentes ao ano e mês, que não queremos perder.
+
+```{r}
+co2
+```
+
+Para resolver isso, podemos utilizar 2 métodos, como indicado por Nícolas. No 1° usamos os pacotes `timetk` e `zoo` para converter co2 para o formato `tibble` e obter as informações de data de `co2`. No 2° método transformamos co2 em um data.frame e criamos as colunas com as informações faltantes nele.
+
+##### 1° USANDO OS PACOTES TIMETK E ZOO
+
+```{r pacotes timetk e zoo - convertendo ts em tibble}
+
+df <- co2   # atribuímos co2 a uma nova variável
+df <- tk_tbl(df)   # transformamos em tibble
+df <- transform(df, Data = zoo::as.Date(index, frac = 0)) # com o pacote zoo definimos o index como a coluna Data
+df <- tibble(df)   
+df
+```
+
+##### 2° TRANSFORMANDO EM DATA FRAME
+
+Se chamamos `help(co2)` vamos ver que ele contém registros do ano de 1959 até 1997, e que estes registros são mensais. Levando isso em consideração, podemos criar as colunas com os valores de `ANO` e `MES` utilizando a função `rep`.
+
+Para criar a coluna de `ANO` informamos que os anos vão de `1959` à `1997`, e que cada ano repete `12` vezes, pois temos informações para cada mês de cada ano.
+
+Para a coluna `MES` informamos que os valores vão do mês `1` (janeiro) ao mês `12` (dezembro), e que a sequência de meses deve ser repetida `39` vezes (comprimento do vetor `co2` - ou seja, a quantidade de linhas - dividido pela quantidade de meses `12`).
+
+```{r criando as demais colunas e convertendo em data.frame}
+co2_df <- data.frame(ANO = rep(1959:1997, times=1, each=12), 
+               MES = rep(1:12, times=39, each=1),
+               CO2 = as.numeric(co2))
+
+View(co2_df)
+```
+
+### Diretório de trabalho
+
+```{r}
+dir()
+
+getwd()
+
+setwd()
+```
+
+### Criando gráficos
+
+#### gr
+
+```{r}
+
+gr <- ggplot(co2_df, aes(x=ANO, y=CO2, colour = CO2)) + 
+  geom_jitter(shape=16, alpha = 0.5, size = 3, show.legend = FALSE) +
+  scale_color_continuous_tableau(palette = "Orange") # +
+  #geom_smooth(lwd=0.5, col="darkred") +
+  #labs(title = "Atmospheric CO2 concentration in ppm from 1959 to 1997") +
+  #xlab("Anos") +
+  #ylab("CO2 (ppm)")
+
+
+print(gr)
+ggplotly(gr)  #error in dirname(to): path too long | O PROBLEMA É POR CAUSA DO MARKDOWN, NOT SURE WHY, MAS NO FORMATO R SCRIP RODA NORMAL
+```
+
+```{r gráfico animado simples do gr}
+
+gr_animate <- gr + transition_states(ANO)  # simples
+gr_animate
+```
+
+```{r gráfico animado mais trabalhado do gr}
+
+gr_animate <- gr + transition_time(ANO) +
+  labs(subtitle = ": ANO{frame_time}") +
+  shadow_wake(wake_length = 0.1)
+
+
+animate(gr_animate, height = 500, width = 800, fps = 30, duration = 10, res = 100)
+anim_save("gr_animate.gif")
+```
+
+#### gr1
+
+```{r gráfico contínuo com o co2_df}
+
+gr1 <- ggplot(co2_df, aes(x=ANO, y=CO2, colour = CO2)) + 
+  geom_jitter(shape=16, alpha = 0.5, size = 3, show.legend = FALSE) +
+  scale_color_continuous_tableau(palette = "Orange") +
+  #geom_smooth(lwd=0.5, col="darkred") +
+  labs(title = "Atmospheric CO2 concentration in ppm from 1959 to 1997") +
+  xlab("Anos") +
+  ylab("CO2 (ppm)")
+
+
+print(gr1)
+#ggplotly(gr1)           # Error in dirname(to) : path too long
+```
+
+```{r gráfico animado do gr1}
+
+gr1_animate <- gr1 + transition_states(ANO)  # simples
+gr1_animate
+```
+
+```{r gráfico animado do co2_df mais complexo}
+
+gr1_animate2 <- gr1 + transition_time(ANO) +
+  labs(subtitle = ": ANO{frame_time}") +
+  shadow_wake(wake_length = 0.1)
+
+#código anterior: animate(gr2_1, renderer = gifski_renderer())
+animate(gr1_animate2, height = 500, width = 800, fps = 30, duration = 10, res = 100)
+anim_save("gr1_animate2.gif")
+```
+
+#### Gráficos de linha
+
+#### gr2
+
+```{r}
+
+gr2 <- ggplot(co2_df, aes(x=ANO, y=CO2, colour = CO2)) + 
+  geom_line() +
+  scale_color_continuous_tableau(palette = "Orange") +
+  labs(title = "Atmospheric CO2 concentration in ppm from 1959 to 1997")
+
+print(gr2)
+ggplotly(gr2)
+```
+
+#### gr3
+
+```{r}
+
+gr3 <- ggplot(co2_df) + 
+  geom_line(aes(x=ANO, y=CO2),
+            linetype=1,
+            lwd=1,
+            col="orange")
+
+print(gr3)
+ggplotly(gr3)
+```
