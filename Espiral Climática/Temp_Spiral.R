@@ -16,7 +16,7 @@ Dados <-
 
 ## Importação de tabela de médias compensadas 1961-1990
 T_Med_Esp <-
-  read_excel("Espiral Climática/Temperatura-Media-Compensada_NCB_1961-1990.xlsx",
+  read_excel("Espiral Climática/Dados/Temperatura-Media-Compensada_NCB_1961-1990.xlsx",
              sheet = "Temperatura_Media", skip = 3, na = "-")
 
 T_Med_Esp <-
