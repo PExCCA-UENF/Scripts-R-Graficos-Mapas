@@ -1,140 +1,158 @@
-# Bibliotecas
+# Bibliotecas #####
 ## tidyverse para manipulação e visualização
-# gganimate para criar a animação final
+## gganimate para criar a animação final
 
 library(tidyverse)
 library(gganimate)
 library(readxl)
 
-# Dados
+# Importação dos Dados #####
 
-## Importação do banco imputado
-Dados <- read.csv(file = file.choose(), sep = ";",
-               dec = ".", header = T, quote = "",
-               skip = 10, na.strings = "null")
+## Tabela Inicial
+Dados <-
+  read.csv(file = "Espiral Climática/Dados/dados_83696_D_1961-01-01_2021-12-31.csv",
+          sep = ";", dec = ".", header = T, quote = "",
+          skip = 10, na.strings = "null") %>%
+  dplyr::select("Data.Medicao", "TEMPERATURA.MINIMA..DIARIA..C.", "TEMPERATURA.MAXIMA..DIARIA..C.",
+         "TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.", "PRECIPITACAO.TOTAL..DIARIO.mm.",
+         "UMIDADE.RELATIVA.DO.AR..MEDIA.DIARIA...") %>%
+  rename("Data" = "Data.Medicao",
+         "Tmin" = "TEMPERATURA.MINIMA..DIARIA..C.",
+         "Tmax" = "TEMPERATURA.MAXIMA..DIARIA..C.",
+         "Tmed" = "TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.",
+         "Prec" =  "PRECIPITACAO.TOTAL..DIARIO.mm.",
+         "Umid" = "UMIDADE.RELATIVA.DO.AR..MEDIA.DIARIA...")
 
 ## Criando vetor de datas para colar na base de dados
 Data <- seq.Date(from = as.Date("1961/01/01"),
                  to = as.Date("2021/12/31"),
                  by = "day")
 
-## Importação do vetor de médias compensada (?)
+## Importação de tabela de médias compensadas 1961-1990
 T_Med_Esp <-
-  read_xls()
+  read_excel("Espiral Climática/Temperatura-Media-Compensada_NCB_1961-1990.xlsx",
+             sheet = "Temperatura_Media", skip = 3, na = "-")
+
+T_Med_Esp <-
+  T_Med_Esp[207, -c(1:3,16)] %>% pivot_longer(cols = everything(),
+                                              names_to = "MesN",
+                                              values_to = "Tmed") %>%
+  mutate("Mes" = 1:12)
+
+# Manipulação dos dados #####
+
+## Imputação
+
+Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
+
+## Organizando
 
 ## Juntar "Dados" e "Data";
 ## Selecionar apenas colunas desejadas
-Dados <-
+
+Dados_pmm_org <-
   tibble(Data = Data,
          Ano = lubridate::year(Data),
          Mes = lubridate::month(Data),
-         Tmed = Dados$`TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.`)
+         Tmed = Dados_pmm$Tmed)
 
-# Imputação?
-#
+## Temperaturas Médidas Mensais Observadas
 
-# Manipulação dos dados
-## A visualização que desejamos criar ilustra a
-## diferença entre a temperatura mensal esperada
-## e a observada. Para saber qual a temperatura
-## mensal esperada, vamos fazer um cálculo de
-## médias por mes em nosso banco de dados.
+T_Med_Obs <-
+  Dados_pmm_org %>%
+  group_by(Ano, Mes) %>%
+  summarise(Tmed = mean(Tmed, na.rm = T),
+            Tsd = sd(Tmed, na.rm = T)) %>%
+  ungroup()
 
-T_Med_Esp <-
-  Dados %>%
-    group_by(Mes) %>%
-    summarise(T_Med_Esp_M = mean(Tmed, na.rm = T),
-              T_Med_Esp_SD = sd(Tmed, na.rm = T))
+## Calculando as anomalias em um novo objeto
 
-## Rápida e simples visualização
+Dif_T_Med <-
+  data.frame(
+    Ano =       T_Med_Obs$Ano,
+    Mes =       T_Med_Obs$Mes,
+    T_Med_Obs_ = T_Med_Obs$Tmed,
+    T_Med_Esp_ = rep(T_Med_Esp$Tmed, 61),
+    Dif_T_M =   T_Med_Obs$Tmed - rep(T_Med_Esp$Tmed, 61)
+  )
+
+
+# Visualização #####
+
+## Rápida visualização da Temperatura Média Esperada
 ggplot(T_Med_Esp) +
-  aes(x = Mes, y = T_Med_Esp_M, color = T_Med_Esp_M) +
-  geom_line(size = 1.3) +
-  geom_errorbar(aes(ymin = T_Med_Esp_M - T_Med_Esp_SD,
-                    ymax = T_Med_Esp_M + T_Med_Esp_SD),
-                width = 0.1) +
-  labs(x = "",
+  aes(x = Mes, y = Tmed, color =  Tmed) +
+  geom_line(size = 1.3, alpha = 0.7) +
+  geom_point(size = 3, alpha = 0.5) +
+  labs(title = "Temperatura Média Compensada 1961-1990 Santa Maria Madalena",
+       x = "",
        y = "Temperatura Média Esperada Mensal")+
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
   scale_color_viridis_c(guide = "none") +
   theme_minimal()
-ggsave("Temp_Esp.png", width = 1000, height = 800, units = "px", bg = "white")
-## Vamos agora achar as temperaturas médias mensais
-## em cada ano e então calcular a diferença entre
-## elas e as temperaturas esperadas.
-
-T_Med_Obs <-
-  Dados %>%
-  group_by(Ano, Mes) %>%
-  summarise(T_Med_Obs_M = mean(Tmed, na.rm = T),
-            T_Med_Obs_SD = sd(Tmed, na.rm = T)) %>%
-  ungroup() %>%
-  filter(Ano != 2021)
+ggsave("Temp_Esp.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ## Rápida visualização comparando Observado com Esperado
 ggplot() +
-  geom_line(
-    data = T_Med_Obs,
-    mapping = aes(
-      x = Mes,
-      y = T_Med_Obs_M,
-      color = T_Med_Obs_M,
-      group = Ano
-      ),
-    alpha = 0.35
-    ) +
-  geom_errorbar(
-    data = T_Med_Obs,
-    mapping = aes(
-      x = Mes,
-      y = T_Med_Obs_M,
-      ymin = T_Med_Obs_M - T_Med_Obs_SD,
-      ymax = T_Med_Obs_M + T_Med_Obs_SD,
-      color = T_Med_Obs_M,
-      group = Ano
-      ),
-    width = 0.1,
-    alpha = 0.35
-    ) +
-  geom_line(
-    data = T_Med_Esp,
-    mapping = aes(
-      x = Mes,
-      y = T_Med_Esp_M
-      ),
-    color = "Black",
-    size = 1.4
-    ) +
-  geom_errorbar(
-    data = T_Med_Esp,
-    mapping = aes(
-      x = Mes,
-      y = T_Med_Esp_M,
-      ymin = T_Med_Esp_M - T_Med_Esp_SD,
-      ymax = T_Med_Esp_M + T_Med_Esp_SD
-      ),
-    width = 0.1,
-    color = "black") +
-  labs(x = "",
+  geom_line(data = T_Med_Obs,
+            mapping = aes(x = Mes, y = Tmed,
+                          color = Tmed, group = Ano),
+            alpha = 0.35, size = 0.2) +
+  geom_errorbar(data = T_Med_Obs,
+                mapping = aes(x = Mes, y = Tmed,
+                              ymin = Tmed - Tsd,
+                              ymax = Tmed + Tsd,
+                              color = Tmed, group = Ano),
+                width = 0.1, alpha = 0.35) +
+  geom_line(data = T_Med_Esp,
+            mapping = aes(x = Mes, y = Tmed),
+            color = "Black", size = 1) +
+  labs(title = "Temperatura Média Compensada 1961-1990 vs Temperatura Média Observada",
+       x = "",
        y = "Temperatura Média Observada Mensal")+
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
   scale_color_viridis_c(guide = "none") +
   theme_minimal()
-ggsave("Temp_Obs.png", width = 1000, height = 800, units = "px", bg = "white")
-## Calculando as diferenças em um novo objeto
+ggsave("Temp_Obs.png", width = 2000, height = 1600, units = "px", bg = "white")
 
-Dif_T_Med <-
-  tibble(
-    Ano =       T_Med_Obs$Ano,
-    Mes =       T_Med_Obs$Mes,
-    Dif_T_M =   T_Med_Obs$T_Med_Obs_M -
-                rep(T_Med_Esp$T_Med_Esp_M, 60)
-  )
+## Visualizando evolução da diferença através dos anos
+ggplot(Dif_T_Med,
+       aes(x = Mes, y = Dif_T_M, group = Ano, color = Ano)) +
+  geom_line(alpha = 0.35, size = 0.2) +
+  scale_color_viridis_c() +
+  scale_x_continuous(breaks = 1:12,
+                     labels = toupper(month.abb)) +
+  scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
+  theme_minimal() +
+  labs(x = "",
+       y = "Anormalidades na Temperatura Média Mensal")
+ggsave("Dif_Anos_L.png", width = 2000, height = 1600, units = "px", bg = "white")
 
+ggplot(Dif_T_Med) +
+  geom_boxplot(aes(x = Ano, y = Dif_T_M, group = Ano)) +
+  labs(y = "Anormalidades na Temperatura Média Mensal") +
+  scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
+  theme_minimal()
+ggsave("Dif_Anos_Bx.png", width = 2000, height = 1600, units = "px", bg = "white")
 
-# Confecção da animação
+ggplot(Dif_T_Med,
+       aes(x = Ano, y = Dif_T_M, color = Dif_T_M)) +
+  geom_point() +
+  geom_smooth(method = "lm",se = F, color = "red") +
+  ggpmisc::stat_poly_eq(formula = y ~ x,
+                        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")),
+                        parse = TRUE,
+                        label.x.npc = "right",
+                        vstep = 0.05) +
+  labs(y = "Anormalidades na Temperatura Média Mensal") +
+  scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
+  scale_color_viridis_c(guide = "none") +
+  theme_minimal()
+ggsave("Dif_Anos_Points.png", width = 2000, height = 1600, units = "px", bg = "white")
+
+# Confecção da animação ######
 
 ## Temos que resolver um problema para o gráfico
 ## circular: A conexção dezembro-janeiro.
@@ -156,7 +174,7 @@ Dif_T_Med %>%
 ## com uma sequencia de numeros, ele funcinará como
 ## contagem de frames.
 
-i <- 1:780
+i <- 1:793
 
 ## Unir tabela M0 e coluna i nos dados
 
@@ -166,107 +184,36 @@ Dados_Pl <-
   arrange(Ano, Mes) %>%
   cbind(i)
 
-## Precisamos de um objeto com valores para serem
-## inseridos na função geom_label para servirem de
-## marcação da diferença de temperatura.
-
-Leg_Raio <-
-  data.frame(
-    x = 1,
-    y = seq(from = -2, to = 2, by = 1),
-    labels = c("-2\u00B0C", "-1\u00B0C", "0\u00B0C",
-               "1\u00B0C", "2\u00B0C"
-               )
-  )
-
-## Plot
+# Grafico
 
 Pl <-
-  ggplot(
-    data = Dados_Pl,
-    mapping = aes(
-      x = Mes,
-      y = Dif_T_M,
-      group = Ano,
-      color = Ano
-      )
-    ) +
+  ggplot(Dados_Pl,
+         aes(x = Mes, y = Dif_T_M,
+             group = Ano, color = Dif_T_M)) +
+  geom_path(size = 1.2, alpha = 0.7) +
+  # O geom_label não quer funcionar, não sei o motivo
+  # geom_label(aes(x = 1, y = -8, label = i),
+             # size = 10, fill = "black", label.size = 0) +
+  scale_color_viridis_c(guide = "none") +
+  scale_x_continuous(breaks = 1:12,
+                     labels = toupper(month.abb)) +
+  scale_y_continuous(limits = c(-6, 6)) +
+  coord_polar(start = -2*pi/12) +
+  # Tema
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill = "Black"),
+    plot.background = element_rect(fill = "Black"),
+    panel.grid = element_blank(),
+    axis.text.x = element_text(color = "yellow", size = 15),
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_text(color="white", size = 13),
+    plot.title = element_text(color="white", hjust = 0.5,size = 15)) +
+  transition_reveal(i)
 
-    # Linhas nas marcações -2 a +2
-    geom_hline(yintercept = -2, color = "Red", size = 1.3) +
-    geom_hline(yintercept = -1, color = "Yellow", size = 1.3) +
-    geom_hline(yintercept = 0, color = "White", size = 1.3) +
-    geom_hline(yintercept = 1, color = "Yellow", size = 1.3) +
-    geom_hline(yintercept = +2, color = "Red", size = 1.3) +
-
-    # Legenda nas marcações -2 a +2
-    geom_label(
-      data = Leg_Raio,
-      mapping = aes(
-        x = x,
-        y = y,
-        label = labels
-        ),
-      inherit.aes = F,
-      color = c("Red", "Yellow", "White", "Yellow", "Red"),
-      fill = "Black", label.size = 0, size = 5
-      ) +
-
-    # Legenda "Ano" no centro o gráfico
-    # geom_label(
-    #   mapping = aes(
-    #     x = 1,
-    #     y = -8,
-    #     label = Ano
-    #     ),
-    #   size = 10,
-    #   fill = "black",
-    #   label.size = 0
-    #   ) +
-
-    # Linhas do gráfico
-    geom_path(
-      size = 1.2,
-      alpha = 0.7
-      ) +
-
-    # Escala de cores
-    scale_color_viridis_c(guide = "none") +
-
-    # Definindo limites de x, y e gráfico redondo
-    scale_x_continuous(
-      breaks = 1:12,
-      labels = toupper(month.abb)
-      ) +
-    scale_y_continuous(
-      limits = c(-8, 3)
-      ) +
-    coord_polar(
-      start = -2*pi/12
-      ) +
-
-    # Tema
-    theme_void() +
-    theme(
-      panel.background = element_rect(fill = "Black"),
-      plot.background = element_rect(fill = "Black"),
-      panel.grid = element_blank(),
-      axis.text.x = element_text(color = "yellow", size = 15),
-      axis.text.y = element_blank(),
-      axis.title.y = element_blank(),
-      axis.title.x = element_blank(),
-      axis.ticks = element_blank(),
-      axis.title = element_text(color="white", size = 13),
-      plot.title = element_text(color="white", hjust = 0.5,size = 15)) +
-    transition_manual(i, cumulative = T, )
-
-
-# Pl
-
-anim_save(Pl, filename = "Temp_Pl.gif")
-#anim_save(
-#  animate(Pl, fps = 12,
-#          width = 5, height = 5,
-#          units = "in", res = 500),
-#  filename = "Temp_Pl.gif")
-
+animate(plot = Pl, nframes = 300, fps = 6, res = 200) %>%
+anim_save(filename = "Gif.gif", animation = .,
+          width = 2000, height = 2000, units = "px")
