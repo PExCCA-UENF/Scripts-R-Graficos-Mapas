@@ -1,6 +1,6 @@
 # Bibliotecas
 ## tidyverse para manipulação e visualização
-## gganimate para criar a animação final
+# gganimate para criar a animação final
 
 library(tidyverse)
 library(gganimate)
