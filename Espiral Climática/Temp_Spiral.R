@@ -10,7 +10,7 @@ library(readxl)
 
 ## Tabela Inicial
 Dados <-
-  read.csv(file = "Espiral Climática/Dados/dados_83696_D_1961-01-01_2021-12-31.csv",
+  read.csv(file = "Espiral Climática/dados_83696_D_1961-01-01_2021-12-31.csv",
           sep = ";", dec = ".", header = T, quote = "",
           skip = 10, na.strings = "null") %>%
   dplyr::select("Data.Medicao", "TEMPERATURA.MINIMA..DIARIA..C.", "TEMPERATURA.MAXIMA..DIARIA..C.",
