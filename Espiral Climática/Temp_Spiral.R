@@ -10,23 +10,9 @@ library(readxl)
 
 ## Tabela Inicial
 Dados <-
-  read.csv(file = "Espiral Climática/dados_83696_D_1961-01-01_2021-12-31.csv",
-          sep = ";", dec = ".", header = T, quote = "",
-          skip = 10, na.strings = "null") %>%
-  dplyr::select("Data.Medicao", "TEMPERATURA.MINIMA..DIARIA..C.", "TEMPERATURA.MAXIMA..DIARIA..C.",
-         "TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.", "PRECIPITACAO.TOTAL..DIARIO.mm.",
-         "UMIDADE.RELATIVA.DO.AR..MEDIA.DIARIA...") %>%
-  rename("Data" = "Data.Medicao",
-         "Tmin" = "TEMPERATURA.MINIMA..DIARIA..C.",
-         "Tmax" = "TEMPERATURA.MAXIMA..DIARIA..C.",
-         "Tmed" = "TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.",
-         "Prec" =  "PRECIPITACAO.TOTAL..DIARIO.mm.",
-         "Umid" = "UMIDADE.RELATIVA.DO.AR..MEDIA.DIARIA...")
+  read.table(file = "Espiral Climática/Dados/Dados_Org_Estação_83698.txt",
+             sep="\t", dec=".", header = T)
 
-## Criando vetor de datas para colar na base de dados
-Data <- seq.Date(from = as.Date("1961/01/01"),
-                 to = as.Date("2021/12/31"),
-                 by = "day")
 
 ## Importação de tabela de médias compensadas 1961-1990
 T_Med_Esp <-
@@ -34,7 +20,7 @@ T_Med_Esp <-
              sheet = "Temperatura_Media", skip = 3, na = "-")
 
 T_Med_Esp <-
-  T_Med_Esp[207, -c(1:3,16)] %>% pivot_longer(cols = everything(),
+  T_Med_Esp[197, -c(1:3,16)] %>% pivot_longer(cols = everything(),
                                               names_to = "MesN",
                                               values_to = "Tmed") %>%
   mutate("Mes" = 1:12)
@@ -43,27 +29,18 @@ T_Med_Esp <-
 
 ## Imputação
 
-Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
+# Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
+# Dados_pmm <- Dados
 
 ## Organizando
-
-## Juntar "Dados" e "Data";
-## Selecionar apenas colunas desejadas
-
-Dados_pmm_org <-
-  tibble(Data = Data,
-         Ano = lubridate::year(Data),
-         Mes = lubridate::month(Data),
-         Tmed = Dados_pmm$Tmed)
 
 ## Temperaturas Médidas Mensais Observadas
 
 T_Med_Obs <-
-  Dados_pmm_org %>%
+  Dados %>%
   group_by(Ano, Mes) %>%
-  summarise(Tmed = mean(Tmed, na.rm = T),
-            Tsd = sd(Tmed, na.rm = T)) %>%
-  ungroup()
+  summarise(TmedM = mean(Tmed, na.rm = TRUE),
+         TsdM = sd(Tmed, na.rm = TRUE)) %>% ungroup()
 
 ## Calculando as anomalias em um novo objeto
 
@@ -71,9 +48,9 @@ Dif_T_Med <-
   data.frame(
     Ano =       T_Med_Obs$Ano,
     Mes =       T_Med_Obs$Mes,
-    T_Med_Obs_ = T_Med_Obs$Tmed,
+    T_Med_Obs_ = T_Med_Obs$TmedM,
     T_Med_Esp_ = rep(T_Med_Esp$Tmed, 61),
-    Dif_T_M =   T_Med_Obs$Tmed - rep(T_Med_Esp$Tmed, 61)
+    Dif_T_M =   T_Med_Obs$TmedM - rep(T_Med_Esp$Tmed, 61)
   )
 
 
@@ -84,9 +61,6 @@ ggplot(T_Med_Esp) +
   aes(x = Mes, y = Tmed, color =  Tmed) +
   geom_line(size = 1.3, alpha = 0.7) +
   geom_point(size = 3, alpha = 0.5) +
-  labs(title = "Temperatura Média Compensada 1961-1990 Santa Maria Madalena",
-       x = "",
-       y = "Temperatura Média Esperada Mensal")+
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
   scale_color_viridis_c(guide = "none") +
@@ -96,21 +70,18 @@ ggsave("Temp_Esp.png", width = 2000, height = 1600, units = "px", bg = "white")
 ## Rápida visualização comparando Observado com Esperado
 ggplot() +
   geom_line(data = T_Med_Obs,
-            mapping = aes(x = Mes, y = Tmed,
-                          color = Tmed, group = Ano),
+            mapping = aes(x = Mes, y = TmedM,
+                          color = TmedM, group = Ano),
             alpha = 0.35, size = 0.2) +
   geom_errorbar(data = T_Med_Obs,
-                mapping = aes(x = Mes, y = Tmed,
-                              ymin = Tmed - Tsd,
-                              ymax = Tmed + Tsd,
-                              color = Tmed, group = Ano),
+                mapping = aes(x = Mes, y = TmedM,
+                              ymin = TmedM - TsdM,
+                              ymax = TmedM + TsdM,
+                              color = TmedM, group = Ano),
                 width = 0.1, alpha = 0.35) +
   geom_line(data = T_Med_Esp,
             mapping = aes(x = Mes, y = Tmed),
             color = "Black", size = 1) +
-  labs(title = "Temperatura Média Compensada 1961-1990 vs Temperatura Média Observada",
-       x = "",
-       y = "Temperatura Média Observada Mensal")+
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
   scale_color_viridis_c(guide = "none") +
@@ -126,13 +97,10 @@ ggplot(Dif_T_Med,
                      labels = toupper(month.abb)) +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
   theme_minimal() +
-  labs(x = "",
-       y = "Anormalidades na Temperatura Média Mensal")
 ggsave("Dif_Anos_L.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ggplot(Dif_T_Med) +
   geom_boxplot(aes(x = Ano, y = Dif_T_M, group = Ano)) +
-  labs(y = "Anormalidades na Temperatura Média Mensal") +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
   theme_minimal()
 ggsave("Dif_Anos_Bx.png", width = 2000, height = 1600, units = "px", bg = "white")
@@ -146,7 +114,6 @@ ggplot(Dif_T_Med,
                         parse = TRUE,
                         label.x.npc = "right",
                         vstep = 0.05) +
-  labs(y = "Anormalidades na Temperatura Média Mensal") +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
   scale_color_viridis_c(guide = "none") +
   theme_minimal()
