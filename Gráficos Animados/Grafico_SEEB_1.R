@@ -17,6 +17,7 @@ library(dplyr)
 # sistema. (http://seeg.eco.br/)
 
 # Dados: https://plataforma.seeg.eco.br/total_emission#
+# Link do drive com os dados importados: https://drive.google.com/drive/folders/1OeVff6kksPQNZvsD42D1gQ78-38GK_3y?usp=sharing
 
 ## Importando o arquivo excel como tibble e atribuindo à variável "Emissco2"
 Emissco2 <- read_excel("~/Estudos/Projetos/Processamento de Dados Ambientais com R - UA UENF/Atividades/PlataformaSEEG_dadosCO2/Arquivos_SEEG/Emissao_CO2e_t _GWP_AR5_1990-2020_Brasil.xlsx",
