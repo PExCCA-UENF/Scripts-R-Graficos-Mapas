@@ -19,10 +19,16 @@ library(dplyr)
 # Dados: https://plataforma.seeg.eco.br/total_emission#
 
 ## Importando o arquivo excel como tibble e atribuindo à variável "Emissco2"
-Emissco2 <- read_excel("Arquivos_SEEG/Emissao_CO2e_t _GWP_AR5_1990-2020_Brasil.xlsx")
+Emissco2 <- read_excel("~/Estudos/Projetos/Processamento de Dados Ambientais com R - UA UENF/Atividades/PlataformaSEEG_dadosCO2/Arquivos_SEEG/Emissao_CO2e_t _GWP_AR5_1990-2020_Brasil.xlsx",
+                       sheet = "Sheet1"
+                       )
+View(Emissco2)
 
+
+# Definindo como data.frame
 Emissco2 <- Emissco2 %>% as.data.frame(Emissco2)
 View(Emissco2)
+
 
 # Analisando "Emissco2"
 class(Emissco2) # é um data.frame
