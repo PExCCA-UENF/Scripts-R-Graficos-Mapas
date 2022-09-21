@@ -38,9 +38,9 @@ T_Med_Esp <-
 
 ## Imputação
 
-# Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
-# Dados <- Dados_pmm
-
+Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
+Dados <- Dados_pmm
+#
 ## Organizando
 
 ## Temperaturas Médidas Mensais
@@ -74,9 +74,19 @@ ggplot(T_Med_Esp) +
   geom_point(size = 3, alpha = 0.5) +
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
-  scale_color_viridis_c(guide = "none") +
   labs(x = "", y = "Normais Temperatura Média Mensal") +
-  theme_clean()
+  scale_color_gradient2(low = "blue", high = "red", guide = "none", midpoint = 24) +
+  theme(
+    panel.background = element_rect(fill = "Gray10"),
+    plot.background = element_rect(fill = "Gray10"),
+    panel.grid = element_line(color = "#002240"),
+    axis.text.x = element_text(color = "yellow", size = 10),
+    axis.text.y = element_text(color = "yellow", size = 10),
+    axis.title.y = element_text(color = "yellow", size = 10),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(colour = "#002240"),
+    panel.grid.major.x = element_blank())
+
 ggsave("Temp_Esp.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ## Rápida visualização comparando temperaturas normais x temperaturas médias
@@ -95,9 +105,19 @@ ggplot() +
             mapping = aes(x = Mes, y = Tmed),
             color = "Black", size = 1) +
   scale_x_discrete(labels = toupper(month.abb)) +
-  scale_color_viridis_c() +
-  labs(x = "", y = "Temperatura Média Mensal") +
-  theme_clean()
+  labs(x = "", y = "Temperatura Média Mensal") #+
+  scale_color_gradient(low = "blue", high = "red", guide = "none") +
+  theme(
+    panel.background = element_rect(fill = "Gray10"),
+    plot.background = element_rect(fill = "Gray10"),
+    panel.grid = element_line(color = "#002240"),
+    axis.text.x = element_text(color = "yellow", size = 10),
+    axis.text.y = element_text(color = "yellow", size = 10),
+    axis.title.y = element_text(color = "yellow", size = 10),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(colour = "#002240"),
+    panel.grid.major.x = element_blank())
+
 ggsave("Temp_Obs.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ## Visualizando evolução da diferença através dos anos
@@ -125,15 +145,28 @@ ggsave("Anomalias_Temp_Bx.png", width = 2000, height = 1600, units = "px", bg = 
 ggplot(Dif_T_Med,
        aes(x = Ano, y = Dif_T_M, color = Dif_T_M)) +
   geom_point() +
-  geom_smooth(method = "lm",se = F, color = "red") +
-  ggpmisc::stat_poly_eq(formula = y ~ x,
+  geom_smooth(method = "lm",se = F, color = "white") +
+  ggpmisc::stat_poly_eq(formula = y ~ x, color = "white",
                         aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")),
                         parse = TRUE,
                         label.x.npc = "right",
                         vstep = 0.05) +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
-  scale_color_viridis_c(guide = "none") +
-  theme_clean()
+  # scale_color_viridis_c(guide = "none") +
+  # theme_clean() +
+  scale_color_gradient(low = "blue", high = "red", guide = "none") +
+  theme(
+    panel.background = element_rect(fill = "Gray10"),
+    plot.background = element_rect(fill = "Gray10"),
+    panel.grid = element_line(color = "#002240"),
+    axis.text.x = element_text(color = "yellow", size = 10),
+    axis.text.y = element_text(color = "yellow", size = 10),
+    axis.title.y = element_text(color = "yellow", size = 10),
+    # panel.grid.minor = element_blank(),
+    # panel.grid.major.y = element_line(colour = "#002240"),
+    # panel.grid.major.x = element_blank()
+    )
+
 ggsave("Anomalias_Temp_Points.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 # Confecção da animação ######
@@ -168,43 +201,58 @@ Dados_Pl <-
   arrange(Ano, Mes) %>%
   cbind(i)
 
+Legenda <-
+  data.frame(
+    x = 1,
+    y = seq(from = -2, to = 2, by = 1),
+    labels = c("-2\u00B0C", "-1\u00B0C", "0\u00B0C",
+               "1\u00B0C", "2\u00B0C"))
+
 # Grafico
 
 # Pl <-
   ggplot(Dados_Pl)+
     aes(x = Mes, y = Dif_T_M,
              group = Ano, color = Dif_T_M) +
-    geom_line(size = 0.6, alpha = 0.7) +
-    geom_point(alpha = 0.3) +
-  # O geom_label não quer funcionar, não sei o motivo
-    geom_label(aes(x = 0, y = -8, label = rep(1961:2021, each = 13)),
-             size = 10, fill = "black", label.size = 0) +
-    scale_color_viridis_c(guide = "none") +
+    geom_hline(yintercept = -2, color = "#326290", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = -1, color = "#6ea2ca", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = 0, color = "White", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = 1, color = "#ec822f", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = +2, color = "#a54122", size = 1.3, alpha = 0.5) +
+    geom_label(data = Legenda,
+               aes(x = x, y = y, label = labels),
+               inherit.aes = F,
+               color = c("Red", "Yellow", "White", "Yellow", "Red"),
+               fill = "Black", label.size = 0, size = 3, alpha = 0.5) +
+    # geom_label(aes(x = 0, y = -10, label = rep(1961:2021, each = 13)),
+    #          size = 10, fill = "black", label.size = 0) +
+    geom_line(size = 1.2) +
+    geom_point() +
+    scale_color_gradient2(low = "blue", high = "red",
+                          midpoint = 0, guide = "none") +
     scale_x_continuous(breaks = 1:12,
-                     labels = toupper(month.abb)) +
-    scale_y_continuous(limits = c(-8, 6)) +
+                       labels = toupper(month.abb)) +
+    scale_y_continuous(limits = c(-10, 4)) +
     coord_polar(start = -2*pi/12) +
-  # theme_clean() +
-    labs(x = "") +
-  # Tema
-  # theme_void() +
-  theme(
-    # panel.background = element_blank(),
-    plot.background = element_rect(fill = "white"),
-    # panel.grid = element_rect(fill = "gray"),
-    # axis.text.x = element_text(color = "yellow", size = 15),
+    labs(x = "",
+         color = "Anomalias de Temperatura") +
+    theme(
+    panel.background = element_rect(fill = "Gray10"),
+    plot.background = element_rect(fill = "Gray10"),
+    panel.grid = element_line(color = "#002240"),
+    axis.text.x = element_text(color = "yellow", size = 15),
     axis.text.y = element_blank(),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    axis.ticks = element_blank()#,
-  #   axis.title = element_text(color="white", size = 13),
-  #   plot.title = element_text(color="white", hjust = 0.5,size = 15)
+    axis.ticks = element_blank()
     ) +
   transition_manual(i, cumulative = T)
 
 animate(plot = Pl, nframes = 300, fps = 6, res = 200) %>%
 anim_save(filename = "Gif.gif", animation = .,
           width = 2000, height = 2000, units = "px")
+# ggsave("Anomalias_Temp_Spiral.png", width = 2000, height = 1600, units = "px", bg = "Gray10")
+
 
 # Grafico interativo?
 
@@ -216,11 +264,17 @@ Dif_T_Med %>%
          x = raio * sin(theta),
          y = raio * cos(theta),
          i = 1:732) %>%
-plot_ly(data = .,
+  unite(col = "Data", c(Ano, Mes), sep = "-") %>%
+  mutate(Data = lubridate::ym(Data)) %>%
+  plot_ly(data = .,
         x = ~x, y = ~y, z = ~i,
+        # frame = ~i, # Temtiva de animação
         type = "scatter3d",
         mode = "lines", sizes = 3,
         line = list(width = 6, color = ~Dif_T_M,
                     colorscale = list(c(-4.5293, "blue"), c(3.3903, "red")))
         )
+
+
+
 
