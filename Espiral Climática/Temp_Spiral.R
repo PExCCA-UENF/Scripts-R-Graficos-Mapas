@@ -1,148 +1,154 @@
 # Bibliotecas #####
-## tidyverse para manipulação e visualização
-## gganimate para criar a animação final
-## readxl para importar normal dos dados
 
-library(tidyverse)
-library(gganimate)
-library(readxl)
-library(ggthemes)
+library(tidyverse) ## tidyverse para manipulação e visualização
+library(gganimate) ## gganimate para criar a animação final
+library(readxl) ## readxl para importar normal dos dados
+library(ggthemes) ## ggthemes para alguns temas
 
 # Importação dos Dados #####
 
 ## Tabela Inicial
 Dados <-
-  read.csv(file = "Espiral Climática/Dados/Dados.csv",
-             sep = ";", dec = ",", header = T, skip = 10, na.strings = "null") %>%
-  select(!X) %>%
-  rename(Data = "Data.Medicao",
+  read.csv(file = "Espiral Climática/Dados/Dados.csv", # Seleciona o arquivo
+             sep = ";", dec = ",", header = T, skip = 10, na.strings = "null") %>% # Configuração da importação
+  select(!X) %>% # Remove coluna X extra (Ela esta presente devido a formatação dos dados)
+  rename(Data = "Data.Medicao", # Renomeando
          Prec = "PRECIPITACAO.TOTAL..DIARIO.mm.",
          Tmax = "TEMPERATURA.MAXIMA..DIARIA..C.",
          Tmed = "TEMPERATURA.MEDIA.COMPENSADA..DIARIA..C.",
          Tmin = "TEMPERATURA.MINIMA..DIARIA..C.") %>%
-  separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-")
+  separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-") # Divide coluna Data em 3
 
 
 ## Importação de tabela de médias normais 1961-1990
-T_Med_Esp <-
+T_Med_Normal <-
   read_excel("Espiral Climática/Dados/Temperatura-Media-Compensada_NCB_1961-1990.xlsx",
              sheet = "Temperatura_Media", skip = 3, na = "-")
-    # Limpando os dados: separando apenas a linha de interesse e pivotando para formatar
-T_Med_Esp <-
-  T_Med_Esp[197, -c(1:3,16)] %>% pivot_longer(cols = everything(),
-                                              names_to = "MesN",
-                                              values_to = "Tmed") %>%
-  mutate("Mes" = 1:12)
+
+## Limpando os dados: separando apenas a linha de interesse e pivotando para formatar
+T_Med_Normal <-
+  T_Med_Normal[197, -c(1:3,16)] %>% # Seleciona linha referente a campos e colunas Janeiro-Dezembro
+  # Pivotar a tabela para ficar com uma coluna de meses e uma com as temperaturas normais
+  pivot_longer(cols = everything(), # Informa que desejamos todas as colunas
+               names_to = "MesN", # Informa o nome da coluna com os meses
+               values_to = "Tmed") %>% # Informa o nome da coluna com os valores
+  mutate("Mes" = 1:12) # Adiciona uma coluna com o número dos meses
 
 # Manipulação dos dados #####
 
 ## Imputação
 
-Dados_pmm <- mice::complete(mice::mice(Dados, method = "pmm"))
-Dados <- Dados_pmm
+Dados <- mice::complete(mice::mice(Dados, method = "pmm"))
+
 #
 ## Organizando
 
 ## Temperaturas Médidas Mensais
 
-T_Med_Obs <-
+T_Med_Mensal <-
   Dados %>%
   group_by(Ano, Mes) %>%
   summarise(TmedM = mean(Tmed, na.rm = TRUE),
-         TsdM = sd(Tmed, na.rm = TRUE)) %>% ungroup() %>%
-  mutate(Ano =       as.numeric(Ano),
-         Mes =       as.numeric(Mes))
+         TsdM = sd(Tmed, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(Ano = as.numeric(Ano),
+         Mes = as.numeric(Mes))
 
 ## Calculando as anomalias em um novo objeto
 
-Dif_T_Med <-
+T_Med_Anomalias <-
   data.frame(
-    Ano =       as.numeric(T_Med_Obs$Ano),
-    Mes =       as.numeric(T_Med_Obs$Mes),
-    T_Med_Obs_ = T_Med_Obs$TmedM,
-    T_Med_Esp_ = rep(T_Med_Esp$Tmed, 61),
-    Dif_T_M =   T_Med_Obs$TmedM - rep(T_Med_Esp$Tmed, 61)
+    Ano =       as.numeric(T_Med_Mensal$Ano),
+    Mes =       as.numeric(T_Med_Mensal$Mes),
+    T_Med_Mensal_ = T_Med_Mensal$TmedM,
+    T_Med_Normal_ = rep(T_Med_Normal$Tmed, 61),
+    Dif_T_M =   T_Med_Mensal$TmedM - rep(T_Med_Normal$Tmed, 61)
   )
 
 
 # Visualização #####
 
 ## Rápida visualização da Temperatura Média Normal 1961-1990
-ggplot(T_Med_Esp) +
+
+ggplot(T_Med_Normal) +
   aes(x = Mes, y = Tmed, color =  Tmed) +
   geom_line(size = 1.3, alpha = 0.7) +
   geom_point(size = 3, alpha = 0.5) +
   scale_x_continuous(breaks = 1:12,
                      labels = toupper(month.abb)) +
   labs(x = "", y = "Normais Temperatura Média Mensal") +
-  scale_color_gradient2(low = "blue", high = "red", guide = "none", midpoint = 24) +
+  scale_color_gradient2(low = "blue", high = "red",
+                        guide = "none", midpoint = 24) +
   theme(
     panel.background = element_rect(fill = "Gray10"),
     plot.background = element_rect(fill = "Gray10"),
-    panel.grid = element_line(color = "#002240"),
+    panel.grid = element_line(color = "#026ec3"),
     axis.text.x = element_text(color = "yellow", size = 10),
     axis.text.y = element_text(color = "yellow", size = 10),
     axis.title.y = element_text(color = "yellow", size = 10),
+    axis.line = element_line(color = "yellow"),
+    axis.ticks = element_line(color = "yellow"),
     panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(colour = "#002240"),
-    panel.grid.major.x = element_blank())
+    )
 
-ggsave("Temp_Esp.png", width = 2000, height = 1600, units = "px", bg = "white")
+ggsave("Temp_Normal.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ## Rápida visualização comparando temperaturas normais x temperaturas médias
 ggplot() +
-  geom_line(data = T_Med_Obs,
+  geom_line(data = T_Med_Mensal,
             mapping = aes(x = Mes, y = TmedM,
                           color = Ano, group = Ano),
             alpha = 0.35, size = 1) +
-  geom_errorbar(data = T_Med_Obs,
+  geom_errorbar(data = T_Med_Mensal,
                 mapping = aes(x = Mes, y = TmedM,
                               ymin = TmedM - TsdM,
                               ymax = TmedM + TsdM,
                               color = Ano, group = Ano),
                 width = 0.1, alpha = 0.35) +
-  geom_line(data = T_Med_Esp,
+  geom_line(data = T_Med_Normal,
             mapping = aes(x = Mes, y = Tmed),
             color = "Black", size = 1) +
   scale_x_discrete(labels = toupper(month.abb)) +
-  labs(x = "", y = "Temperatura Média Mensal") #+
-  scale_color_gradient(low = "blue", high = "red", guide = "none") +
+  labs(x = "", y = "Temperatura Média Mensal") +
+scale_color_gradient(low = "blue", high = "red") +
   theme(
     panel.background = element_rect(fill = "Gray10"),
     plot.background = element_rect(fill = "Gray10"),
-    panel.grid = element_line(color = "#002240"),
+    panel.grid = element_line(color = "#026ec3"),
     axis.text.x = element_text(color = "yellow", size = 10),
     axis.text.y = element_text(color = "yellow", size = 10),
     axis.title.y = element_text(color = "yellow", size = 10),
+    axis.line = element_line(color = "yellow"),
+    axis.ticks = element_line(color = "yellow"),
     panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(colour = "#002240"),
-    panel.grid.major.x = element_blank())
+  )
 
 ggsave("Temp_Obs.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ## Visualizando evolução da diferença através dos anos
-ggplot(Dif_T_Med,
-       aes(x = Mes, y = Dif_T_M, group = Ano, color = Ano)) +
-  geom_line(alpha = 0.35, size = 1) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_viridis_c() +
-  scale_x_continuous(breaks = 1:12,
-                     labels = toupper(month.abb)) +
-  scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
-  theme_clean() +
-  labs(x = "", y = "Anormalidades de Temperatura")
-ggsave("Anomalias_Temp_L.png", width = 2000, height = 1600, units = "px", bg = "white")
 
-ggplot(Dif_T_Med) +
-  geom_boxplot(aes(x = Ano, y = Dif_T_M, group = Ano, color = Ano)) +
+ggplot(T_Med_Anomalias) +
+  geom_boxplot(aes(x = Ano, y = Dif_T_M, group = Ano), color = "yellow", fill = "yellow4") +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_viridis_c() +
-  theme_clean()
+  # scale_color_gradient2(low = "blue", high = "red",
+                        # guide = "none", midpoint = 24) +
+  theme(
+    panel.background = element_rect(fill = "Gray10"),
+    plot.background = element_rect(fill = "Gray10"),
+    panel.grid = element_line(color = "#026ec3"),
+    axis.text.x = element_text(color = "yellow", size = 10),
+    axis.title.x = element_text(color = "yellow", size = 10),
+    axis.text.y = element_text(color = "yellow", size = 10),
+    axis.title.y = element_text(color = "yellow", size = 10),
+    axis.line = element_line(color = "yellow"),
+    axis.ticks = element_line(color = "yellow"),
+    panel.grid.minor = element_blank(),
+  )
+
 ggsave("Anomalias_Temp_Bx.png", width = 2000, height = 1600, units = "px", bg = "white")
 
-ggplot(Dif_T_Med,
+ggplot(T_Med_Anomalias,
        aes(x = Ano, y = Dif_T_M, color = Dif_T_M)) +
   geom_point() +
   geom_smooth(method = "lm",se = F, color = "white") +
@@ -179,7 +185,7 @@ ggsave("Anomalias_Temp_Points.png", width = 2000, height = 1600, units = "px", b
 ## para cortar o escesso.
 
 T_Med_0 <-
-Dif_T_Med %>%
+T_Med_Anomalias %>%
   filter(Mes == 12) %>%
   mutate(Ano = Ano + 1,
          Mes = 0)
@@ -196,7 +202,7 @@ i <- 1:793
 ## Unir tabela M0 e coluna i nos dados
 
 Dados_Pl <-
-  Dif_T_Med %>%
+  T_Med_Anomalias %>%
   rbind(T_Med_0) %>%
   arrange(Ano, Mes) %>%
   cbind(i)
@@ -258,7 +264,7 @@ anim_save(filename = "Gif.gif", animation = .,
 
 library(plotly)
 
-Dif_T_Med %>%
+T_Med_Anomalias %>%
   mutate(raio = Dif_T_M + 8,
          theta = 2 * pi * (Mes - 1) / 12,
          x = raio * sin(theta),
