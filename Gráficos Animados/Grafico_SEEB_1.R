@@ -19,15 +19,18 @@ library(dplyr)
 # Dados: https://plataforma.seeg.eco.br/total_emission#
 # Link do drive com os dados importados: https://drive.google.com/drive/folders/1OeVff6kksPQNZvsD42D1gQ78-38GK_3y?usp=sharing
 
-## Importando o arquivo excel como tibble e atribuindo à variável "Emissco2"
-Emissco2 <- read_excel("~/Estudos/Projetos/Processamento de Dados Ambientais com R - UA UENF/Atividades/PlataformaSEEG_dadosCO2/Arquivos_SEEG/Emissao_CO2e_t _GWP_AR5_1990-2020_Brasil.xlsx",
-                       sheet = "Sheet1"
-                       )
+
+# Por fora, convertemos o arquivo excel em csv separado por vírgulas
+# isso porque apesar de alguns pacotes permitirem a leitura direta de arquivos excel, não são a melhor opção
+
+## Importando o arquivo csv e atribuindo à variável "Emissco2"
+Emissco2 <- read_excel("~/Estudos/Projetos/Processamento de Dados Ambientais com R - UA UENF/Atividades/PlataformaSEEG_dadosCO2/Arquivos_SEEG/Emissao_CO2e_t _GWP_AR5_1990-2020_Brasil.xlsx")
 View(Emissco2)
 
 
-# Definindo como data.frame
-Emissco2 <- Emissco2 %>% as.data.frame(Emissco2)
+Emissco2 <- pivot_longer(Emissco2, '1990':'2020',
+             names_to = "Ano",
+             values_to = "Emissão")
 View(Emissco2)
 
 
@@ -41,10 +44,8 @@ View(Emissco2)
 Emissco2 <- Emissco2 %>% select(-Total)
 View(Emissco2)
 
-# Convertendo os valores de character para numéricos -- vai dar erro !
-Emissco2 %>% mutate(`2020` = as.numeric(`2020`)) %>%  # os valores da coluna são convertidos em NAs
-  str()
-# Possível explicação: https://acervolima.com/como-converter-a-coluna-dataframe-de-character-para-numeric-em-r/#:~:text=A%20convers%C3%A3o%20pode%20ser%20feita,numeric().
-
-
-
+# Substituindo pontos dos chacteres numericos da coluna "Emissão" e transformando os valores em "numeric"
+Emissco2$Emissão <- str_replace_all(Emissco2$Emissão, fixed("."), "")
+Emissco2$Emissão <- as.numeric(Emissco2$Emissão)
+View(Emissco2)
+str(Emissco2)
