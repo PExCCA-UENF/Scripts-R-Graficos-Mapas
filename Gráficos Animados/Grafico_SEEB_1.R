@@ -58,11 +58,27 @@ Emissco2$Emissao <- as.numeric(Emissco2$Emissao)
 View(Emissco2)
 str(Emissco2)
 
+# Criando uma coluna "Ano_num" -- anos numéricos ao invés de character
+Emissco2 <- Emissco2 %>% mutate(Ano_num = as.numeric(Ano))
+
 # GRÁFICOS -----------------
 # Jitter
 ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria )) +
-  geom_jitter(alpha=0.7, size=8)
+  geom_jitter(alpha=0.7, size=8) +
+  theme(axis.text.x = element_text(angle = 10, vjust = .5))
 
-ggplot(Emissco2, aes(x=Categoria, fill=Categoria)) + geom_bar()
+# Linha
+gr_linha <- ggplot(Emissco2, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
+  geom_line() +
+  theme(axis.text.x = element_text(angle = 30, vjust = .5)) +
+  labs(title = "Emissão de CO2 por ano e categoria") +
+  xlab("Anos") +
+  ylab("Emissao") +
+  geom_point(alpha=0.7)
+gr_linha
 
+ggplotly(gr_linha)
 
+# Definindo as informações de visualização da animação e chamando o resultado
+gr_linha_anim <- gr_linha + transition_reveal(Ano_num)
+gr_linha_anim
