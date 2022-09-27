@@ -214,10 +214,11 @@ Legenda <-
     labels = c("-2\u00B0C", "-1\u00B0C", "0\u00B0C",
                "1\u00B0C", "2\u00B0C"))
 
-# Grafico
+## Animação Tentativa 1 ####
 
 # Pl <-
-  ggplot(Dados_Pl)+
+Dados_Pl %>% filter(i < 14) %>%
+  ggplot()+
     aes(x = Mes, y = Dif_T_M,
              group = Ano, color = Dif_T_M) +
     geom_hline(yintercept = -2, color = "#326290", size = 1.3, alpha = 0.5) +
@@ -254,13 +255,106 @@ Legenda <-
     ) +
   transition_manual(i, cumulative = T)
 
-animate(plot = Pl, nframes = 300, fps = 6, res = 200) %>%
-anim_save(filename = "Gif.gif", animation = .,
-          width = 2000, height = 2000, units = "px")
-# ggsave("Anomalias_Temp_Spiral.png", width = 2000, height = 1600, units = "px", bg = "Gray10")
+animate(plot = Pl, nframes = 300, fps = 6, res = 250) %>%
+  anim_save(filename = "Gif.gif", animation = .,
+            width = 2000, height = 2000, units = "px")
 
+## Animação Tentativa 2 ####
 
-# Grafico interativo?
+library(animation)
+
+saveGIF({
+  for(a in 1:793){
+  print(
+    ggplot(Dados_Pl %>% filter(a <= i),
+           aes(x = Mes, y = Dif_T_M, group = Ano, color = Dif_T_M)) +
+      geom_hline(yintercept = -2, color = "#326290", size = 1.3, alpha = 0.5) +
+      geom_hline(yintercept = -1, color = "#6ea2ca", size = 1.3, alpha = 0.5) +
+      geom_hline(yintercept = 0, color = "White", size = 1.3, alpha = 0.5) +
+      geom_hline(yintercept = 1, color = "#ec822f", size = 1.3, alpha = 0.5) +
+      geom_hline(yintercept = +2, color = "#a54122", size = 1.3, alpha = 0.5) +
+      geom_label(data = Legenda,
+                aes(x = x, y = y, label = labels),
+                    inherit.aes = F,
+                    color = c("Red", "Yellow", "White", "Yellow", "Red"),
+                    fill = "Black", label.size = 0, size = 3, alpha = 0.5) +
+      # geom_label(aes(x = 0, y = -10, label = rep(1961:2021, each = 13)),
+      #          size = 10, fill = "black", label.size = 0) +
+      geom_line(size = 1.2) +
+      geom_point() +
+      scale_color_gradient2(low = "blue", high = "red",
+                            midpoint = 0, guide = "none") +
+      scale_x_continuous(breaks = 1:12,
+                        labels = toupper(month.abb)) +
+      scale_y_continuous(limits = c(-10, 4)) +
+      coord_polar(start = -2*pi/12) +
+      labs(x = "",
+           color = "Anomalias de Temperatura") +
+      theme(
+            panel.background = element_rect(fill = "Gray10"),
+            plot.background = element_rect(fill = "Gray10"),
+            panel.grid = element_line(color = "#002240"),
+            axis.text.x = element_text(color = "yellow", size = 15),
+            axis.text.y = element_blank(),
+            axis.title.y = element_blank(),
+            axis.title.x = element_blank(),
+            axis.ticks = element_blank()
+            ), width = 2000, height = 1600, units = "px"
+  )}
+}, interval = 0.1)
+
+## Animação Tentativa 3 (SUCESSO!) ####
+
+for(a in 2:793){
+
+  ggplot(Dados_Pl %>% filter(i <= a),
+         aes(x = Mes, y = Dif_T_M,
+             group = Ano, color = Dif_T_M)) +
+    geom_hline(yintercept = -2, color = "#326290", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = -1, color = "#6ea2ca", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = 0, color = "White", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = 1, color = "#ec822f", size = 1.3, alpha = 0.5) +
+    geom_hline(yintercept = +2, color = "#a54122", size = 1.3, alpha = 0.5) +
+    geom_label(data = Legenda,
+               aes(x = x, y = y, label = labels),
+               inherit.aes = F,
+               color = c("Red", "Yellow", "White", "Yellow", "Red"),
+               fill = "Black", label.size = 0, size = 3, alpha = 0.5) +
+    geom_rect(aes(xmin = 0,
+                  xmax = 12,
+                  ymin = -10,
+                  ymax = -5), color = "black", fill = "black") +
+    geom_label(aes(x = 0, y = -10, label = Ano),
+               size = 10, fill = "black", label.size = 0) +
+    # geom_text(aes(x = 0, y = -10,
+    #               label = Ano, color = Dif_T_M), size = 10) +
+    geom_line(size = 1.2) +
+    geom_point() +
+    scale_color_gradient2(low = "blue", high = "red",
+                          midpoint = 0, guide = "none") +
+    scale_x_continuous(breaks = 1:12,
+                       labels = toupper(month.abb)) +
+    scale_y_continuous(limits = c(-10, 4)) +
+    coord_polar(start = -2*pi/12) +
+    labs(x = "",
+         color = "Anomalias de Temperatura") +
+    theme(
+      panel.background = element_rect(fill = "Gray10"),
+      plot.background = element_rect(fill = "Gray10"),
+      panel.grid = element_line(color = "#002240"),
+      axis.text.x = element_text(color = "yellow", size = 15),
+      axis.text.y = element_blank(),
+      axis.title.y = element_blank(),
+      axis.title.x = element_blank(),
+      axis.ticks = element_blank()
+    )
+
+  ggsave(filename = paste("Anomalias_Temp_Spiral_", a,".png", sep = ""),
+         width = 2000, height = 1600,
+         units = "px", bg = "Gray10")
+}
+
+# Grafico interativo ####
 
 library(plotly)
 
