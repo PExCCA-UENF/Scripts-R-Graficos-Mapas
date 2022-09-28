@@ -43,6 +43,10 @@ dim(Emissco2)   # possui 6 linhas e 32 colunas
 str(Emissco2)
 View(Emissco2)
 
+# Criando um vetor só com os valores da coluna "Total"
+Emissco2_total <- Emissco2$Total
+View(Emissco2_total)
+
 # Removendo a coluna "Total"
 Emissco2 <- Emissco2 %>% select(-Total)
 View(Emissco2)
@@ -58,27 +62,66 @@ Emissco2$Emissao <- as.numeric(Emissco2$Emissao)
 View(Emissco2)
 str(Emissco2)
 
-# Criando uma coluna "Ano_num" -- anos numéricos ao invés de character
+# Criando um vetor com os valores da Categoria "Mudança de Uso da Terra e Florestas"
+mutf <- Emissco2 %>%
+  filter(Categoria == "Mudança de Uso da Terra e Florestas")
+View(mutf)
+
+# Criando um vetor com os valores da Categoria "Energia" e "Agropecuária"
+enagro <- Emissco2 %>%
+  filter(Categoria %in% c("Energia", "Agropecuária"))
+View(enagro)
+
+# Criando colunas "Ano_num" -- anos numéricos ao invés de character
 Emissco2 <- Emissco2 %>% mutate(Ano_num = as.numeric(Ano))
 
-# GRÁFICOS -----------------
-# Jitter
-ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria )) +
-  geom_jitter(alpha=0.7, size=8) +
-  theme(axis.text.x = element_text(angle = 10, vjust = .5))
+mutf <- mutf %>% mutate(Ano_num = as.numeric(Ano))
 
-# Linha
-gr_linha <- ggplot(Emissco2, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
+enagro <- enagro %>% mutate(Ano_num = as.numeric(Ano))
+
+# GRÁFICOS -----------------------
+# GRÁFICOS DE LINHA
+# Linha: Mudança de uso da terra e florestas
+gr_linha_mutf <- ggplot(mutf, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
   geom_line() +
   theme(axis.text.x = element_text(angle = 30, vjust = .5)) +
-  labs(title = "Emissão de CO2 por ano e categoria") +
+  labs(title = "Emissão de CO2 do setor de Mudança de Uso da Terra e Florestas por Ano no Brasil") +
   xlab("Anos") +
   ylab("Emissao") +
   geom_point(alpha=0.7)
-gr_linha
+gr_linha_mutf
 
-ggplotly(gr_linha)
+ggplotly(gr_linha_mutf)
+
+# Linha: Energia + Agropecuária
+gr_linha_enagro <- ggplot(enagro, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
+  geom_line() +
+  theme(axis.text.x = element_text(angle = 30, vjust = .5)) +
+  labs(title = "Emissão de CO2 dos setores de Energia e Agropecuária por Ano no Brasil") +
+  xlab("Anos") +
+  ylab("Emissao") +
+  geom_point(alpha=0.7)
+gr_linha_enagro
+
+ggplotly(gr_linha_enagro)
 
 # Definindo as informações de visualização da animação e chamando o resultado
-gr_linha_anim <- gr_linha + transition_reveal(Ano_num)
+gr_linha_anim <- gr_linha_enagro + transition_reveal(Ano_num)
 gr_linha_anim
+
+
+# GRÁFICOS DE BARRAS
+Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria, fill=Categoria)) +
+  geom_bar(stat="identity") +
+  theme(axis.text.y = element_text(angle = 30, vjust = .5)) +
+  coord_flip()
+Emissco2_barplt
+
+# Definindo as informações de visualização da animação e chamando o resultado
+Emissco2_barplt_anim <- Emissco2_barplt + transition_reveal(Ano_num)
+Emissco2_barplt_anim
+
+# Definindo as configurações de renderização da animação e chamando o resultado
+# height = 600, width = 1500, fps = 30, duration = 5, res = 100
+Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 3000, fps = 30, duration = 5, res = 200)
+Emissco2_barplt_anim2
