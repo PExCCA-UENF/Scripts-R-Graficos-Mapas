@@ -5,6 +5,8 @@
 #install.packages("tidyverse")
 #install.packages("dplyr")
 #install.packages("gridExtra")
+#install.packages("devtools")
+#install.packages("hrbrthemes")
 
 # unlink("C:/Users/camil/AppData/Local/R/win-library/4.2/00LOCK", recursive = TRUE)
 
@@ -19,6 +21,9 @@ library(gganimate)
 library(av)
 library(gridExtra)
 library(grid)
+library(data.table)
+library(devtools)
+library(hrbrthemes)
 
 
 ## A PLATAFORMA SEEG:
@@ -51,6 +56,18 @@ dim(Emissco2)   # possui 6 linhas e 32 colunas
 str(Emissco2)
 View(Emissco2)
 
+# COLUNA TOTAL
+# Removendo as linhas da Categoria "Total"
+linhas_total <- c(156:186)
+Emissco2 <- Emissco2[-linhas_total,]
+View(Emissco2)
+
+# Substituindo pontos dos chacteres numericos da coluna "Total" e transformando os valores em "numeric"
+Emissco2$Total <- str_replace_all(Emissco2$Total, fixed("."), "")
+Emissco2$Total <- as.numeric(Emissco2$Total)
+View(Emissco2)
+str(Emissco2)
+
 # Criando um vetor só com os valores da coluna "Total"
 Emissco2_total <- Emissco2$Total
 View(Emissco2_total)
@@ -59,16 +76,14 @@ View(Emissco2_total)
 Emissco2 <- Emissco2 %>% select(-Total)
 View(Emissco2)
 
-# Removendo as linhas da Categoria "Total"
-linhas_total <- c(156:186)
-Emissco2 <- Emissco2[-linhas_total,]
-View(Emissco2)
 
+# COLUNA EMISSÃO
 # Substituindo pontos dos chacteres numericos da coluna "Emissão" e transformando os valores em "numeric"
 Emissco2$Emissao <- str_replace_all(Emissco2$Emissao, fixed("."), "")
 Emissco2$Emissao <- as.numeric(Emissco2$Emissao)
 View(Emissco2)
 str(Emissco2)
+
 
 # Criando um vetor com os valores da Categoria "Mudança de Uso da Terra e Florestas"
 mutf <- Emissco2 %>%
@@ -88,7 +103,8 @@ mutf <- mutf %>% mutate(Ano_num = as.numeric(Ano))
 enagro <- enagro %>% mutate(Ano_num = as.numeric(Ano))
 
 # Consertando a ESCALA do gráfico - passando para porcentagem (%)
-Emissco2$Percent <- (Emissco2$Emissao / Emissco2_total ) * 100
+#----Emissco2 <- group_by(Emissco2, Categoria) %>% mutate(percent = (Emissao/sum(Emissao))*100)
+#------View(Emissco2)
 
 # GRÁFICOS -----------------------
 # GRÁFICOS DE LINHA
@@ -150,8 +166,8 @@ anim_save("enagro.gif")
 # Salvando a animação em mp4
 av::av_encode_video(enagro_linha_anim2, output = "enagro.mp4")
 
-# GRÁFICOS DE BARRAS
 
+# GRÁFICOS DE BARRAS
 # mudando a ordem das categorias
 Emissco2$Categoria <- factor(Emissco2$Categoria,
                              levels = c("Mudança de Uso da Terra e Florestas",
@@ -160,6 +176,7 @@ Emissco2$Categoria <- factor(Emissco2$Categoria,
                                         "Processos Industriais",
                                         "Resíduos"))
 
+# Gráfico de Barras
 Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria, fill=Categoria)) +
   geom_bar(stat="identity") +
   scale_color_brewer(palette = "Set1") +
@@ -167,7 +184,7 @@ Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria,
   theme(axis.text.y = element_text(angle = 30, vjust = .5),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(color = "gray80", size = 0.5)) +
-  #geom_text(aes(label = Emissao), vjust = -0.1, colour = "black", size = 3) +
+  geom_text(aes(label = Emissao), vjust = -0.1, colour = "black", size = 3) +
   coord_flip()
 Emissco2_barplt
 
