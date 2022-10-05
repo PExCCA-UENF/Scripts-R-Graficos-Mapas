@@ -24,6 +24,7 @@ library(grid)
 library(data.table)
 library(devtools)
 library(hrbrthemes)
+library(scales)
 
 
 ## A PLATAFORMA SEEG:
@@ -85,6 +86,15 @@ View(Emissco2)
 str(Emissco2)
 
 
+# Criando coluna de porcentagem
+Emissco2 <-
+  Emissco2 %>% group_by(Ano) %>%
+  mutate(percent = (Emissao/sum(Emissao))*100) %>%
+  mutate(percent = round(percent, 0)) %>%
+  mutate(percent2 = as.character(percent))
+View(Emissco2)
+
+
 # Criando um vetor com os valores da Categoria "Mudança de Uso da Terra e Florestas"
 mutf <- Emissco2 %>%
   filter(Categoria == "Mudança de Uso da Terra e Florestas")
@@ -102,22 +112,26 @@ mutf <- mutf %>% mutate(Ano_num = as.numeric(Ano))
 
 enagro <- enagro %>% mutate(Ano_num = as.numeric(Ano))
 
-# Consertando a ESCALA do gráfico - passando para porcentagem (%)
-#----Emissco2 <- group_by(Emissco2, Categoria) %>% mutate(percent = (Emissao/sum(Emissao))*100)
-#------View(Emissco2)
 
 # GRÁFICOS -----------------------
 # GRÁFICOS DE LINHA
 # Linha: Mudança de uso da terra e florestas
-gr_linha_mutf <- ggplot(mutf, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
+gr_linha_mutf <- ggplot(mutf, aes(x=Ano_num, y=Emissao, group=Categoria, color=Categoria)) +
   geom_line(size=1.2) +
   labs(caption = "Emissão de CO2 do setor de Mudança de Uso da Terra e Florestas por Ano no Brasil") +
-  theme(axis.text.x = element_text(angle = 30, vjust = .5),
-        plot.caption = element_text(color = "black", size = 12, face = "bold"),
+  theme(axis.text.x = element_text(angle = 30, vjust = .5, size = 12),
+        axis.text.y = element_text(color = "grey20", size = 12, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        legend.title = element_text(size=16),
+        legend.text = element_text(size=14),
+        plot.caption = element_text(color = "black", size = 16, face = "bold", hjust = 0),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(color = "gray80", size = 0.5)) +
   xlab("Anos") +
-  ylab("Emissao") +
+  ylab("Emissão de CO2e (t) GWP-AR5") +
+  scale_y_continuous(labels = label_number(suffix = " Ton", scale = 1e-8)) +
+  scale_x_continuous(limits = c(1990, 2020), breaks = seq(1990, 2020, 5)) +
   geom_point(alpha=0.7)
 gr_linha_mutf
 
@@ -128,7 +142,7 @@ mutf_linha_anim <- gr_linha_mutf + transition_reveal(Ano_num)
 mutf_linha_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-mutf_linha_anim2 <- animate(mutf_linha_anim, height = 600, width = 1200, fps = 30, duration = 5, res = 100)
+mutf_linha_anim2 <- animate(mutf_linha_anim, height = 1200, width = 1200, fps = 30, duration = 5, res = 100)
 mutf_linha_anim2
 
 # Salvando a animação em gif
@@ -138,15 +152,22 @@ anim_save("mutf.gif")
 av::av_encode_video(mutf_linha_anim2, output = "mutf.mp4")
 
 # Linha: Energia + Agropecuária (ENAGRO)
-enagro_linha <- ggplot(enagro, aes(x=Ano, y=Emissao, group=Categoria, color=Categoria)) +
+enagro_linha <- ggplot(enagro, aes(x=Ano_num, y=Emissao, group=Categoria, color=Categoria)) +
   geom_line(size=1.2) +
   labs(caption = "Emissão de CO2 dos setores de Energia e Agropecuária por Ano no Brasil") +
-  theme(axis.text.x = element_text(angle = 30, vjust = .5),
-        plot.caption = element_text(color = "black", size = 12, face = "bold"),
+  theme(axis.text.x = element_text(angle = 30, vjust = .5, size = 14),
+        axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size=16),
+        plot.caption = element_text(color = "black", size = 20, face = "bold", hjust = 0),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(color = "gray80", size = 0.5))  +
   xlab("Anos") +
-  ylab("Emissao") +
+  ylab("Emissão de CO2e (t) GWP-AR5") +
+  scale_y_continuous(labels = label_number(suffix = " Ton", scale = 1e-8)) +
+  scale_x_continuous(limits = c(1990, 2020), breaks = seq(1990, 2020, 5)) +
   geom_point(alpha=0.7)
 enagro_linha
 
@@ -157,14 +178,14 @@ enagro_linha_anim <- enagro_linha + transition_reveal(Ano_num)
 enagro_linha_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-enagro_linha_anim2 <- animate(enagro_linha_anim, height = 600, width = 1200, fps = 30, duration = 5, res = 100)
+enagro_linha_anim2 <- animate(enagro_linha_anim, height = 1200, width = 1200, fps = 30, duration = 5, res = 100)
 enagro_linha_anim2
 
 # Salvando a animação em gif
 anim_save("enagro.gif")
 
 # Salvando a animação em mp4
-av::av_encode_video(enagro_linha_anim2, output = "enagro.mp4")
+av::av_encode_video(enagro_linha_anim2, output = "enagro3.mp4")
 
 
 # GRÁFICOS DE BARRAS
@@ -177,16 +198,28 @@ Emissco2$Categoria <- factor(Emissco2$Categoria,
                                         "Resíduos"))
 
 # Gráfico de Barras
-Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria, fill=Categoria)) +
+Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=percent, color=Categoria, fill=Categoria)) +
   geom_bar(stat="identity") +
   scale_color_brewer(palette = "Set1") +
   scale_fill_brewer(palette = "Set1") +
-  theme(axis.text.y = element_text(angle = 30, vjust = .5),
+  theme(axis.text.x = element_text(angle = 0, vjust = .5, size = 14),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size=16),
         panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_line(color = "gray80", size = 0.5)) +
-  geom_text(aes(label = Emissao), vjust = -0.1, colour = "black", size = 3) +
+        panel.grid.major = element_line(color = "gray80", size = 0.5))  +
+  ylab("Emissão CO2 (%)") +
+  xlab("Setores") +
+  geom_text(aes(label = percent2), hjust = -0.2, colour = "black", size = 6) +
   coord_flip()
 Emissco2_barplt
+
+#---- "Mudança de uso\nda Terra e Florestas"
+#---- scale_y_discrete(labels = c("nome1", "nome2", ...) )
+#---- theme(legend.position="bottom")
+#---- ggtheme | ggpubr | View(theme_pubr)
 
 # Definindo as informações de visualização da animação e chamando o resultado
 Emissco2_barplt_anim <- Emissco2_barplt + transition_time(as.integer(Ano_num)) +
@@ -194,11 +227,11 @@ Emissco2_barplt_anim <- Emissco2_barplt + transition_time(as.integer(Ano_num)) +
 Emissco2_barplt_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 3000, fps = 30, duration = 5, res = 200)
+Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 2400, fps = 30, duration = 5, res = 200)
 Emissco2_barplt_anim2
 
 # Salvando a animação em gif
 anim_save("Emissoes_bar.gif")
 
 # Salvando a animação
-av::av_encode_video(Emissco2_barplt_anim2, output = "Emissoes_barra.mp4")
+av::av_encode_video(Emissco2_barplt_anim2, output = "Emissoes_barra4.mp4")
