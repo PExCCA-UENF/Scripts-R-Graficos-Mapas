@@ -154,14 +154,14 @@ av::av_encode_video(mutf_linha_anim2, output = "mutf.mp4")
 # Linha: Energia + Agropecuária (ENAGRO)
 enagro_linha <- ggplot(enagro, aes(x=Ano_num, y=Emissao, group=Categoria, color=Categoria)) +
   geom_line(size=1.2) +
-  labs(caption = "Emissão de CO2 (Mt) dos setores de Energia e Agropecuária por Ano no Brasil") +
+  labs(caption = "Emissão de CO2 (Mt) dos setores de Energia e \nAgropecuária por Ano no Brasil") +
   theme(axis.text.x = element_text(angle = 30, vjust = .5, size = 14),
         axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = 1, vjust = 0, face = "plain"),
         axis.title.x = element_text(size = 16),
         axis.title.y = element_text(size = 16),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size=16),
-        plot.caption = element_text(color = "black", size = 20, face = "bold", hjust = 0),
+        legend.title = element_text(size=16),
+        legend.text = element_text(size=14),
+        plot.caption = element_text(color = "black", size = 15, face = "bold", hjust = 0),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(color = "gray80", size = 0.5))  +
   xlab("Anos") +
@@ -178,14 +178,14 @@ enagro_linha_anim <- enagro_linha + transition_reveal(Ano_num)
 enagro_linha_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-enagro_linha_anim2 <- animate(enagro_linha_anim, height = 1200, width = 1200, fps = 30, duration = 5, res = 100)
+enagro_linha_anim2 <- animate(enagro_linha_anim, height = 600, width = 600, fps = 30, duration = 12, res = 100)
 enagro_linha_anim2
 
 # Salvando a animação em gif
 anim_save("enagro.gif")
 
 # Salvando a animação em mp4
-av::av_encode_video(enagro_linha_anim2, output = "enagro4.mp4")
+av::av_encode_video(enagro_linha_anim2, output = "enagro6.mp4")
 
 
 # GRÁFICOS DE BARRAS
@@ -202,7 +202,8 @@ Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=percent, color=Categoria,
   geom_bar(stat="identity") +
   scale_color_brewer(palette = "Set1") +
   scale_fill_brewer(palette = "Set1") +
-  theme(axis.text.x = element_text(angle = 0, vjust = .5, size = 14),
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.text.x = element_text(angle = 0, vjust = .5, size = 14),
         axis.text.y = element_blank(),
         axis.title.x = element_text(size = 16),
         axis.title.y = element_text(size = 16),
@@ -223,15 +224,16 @@ Emissco2_barplt
 
 # Definindo as informações de visualização da animação e chamando o resultado
 Emissco2_barplt_anim <- Emissco2_barplt + transition_time(as.integer(Ano_num)) +
-  labs(subtitle = "ANO: {frame_time}")
+  ggtitle("ANO: {frame_time}")
+  #labs(title = "ANO: {frame_time}")
 Emissco2_barplt_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 2400, fps = 30, duration = 5, res = 200)
+Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 2400, fps = 30, duration = 12, res = 200)
 Emissco2_barplt_anim2
 
 # Salvando a animação em gif
 anim_save("Emissoes_bar.gif")
 
 # Salvando a animação
-av::av_encode_video(Emissco2_barplt_anim2, output = "Emissoes_barra5.mp4")
+av::av_encode_video(Emissco2_barplt_anim2, output = "Emissoes_barra6.mp4")
