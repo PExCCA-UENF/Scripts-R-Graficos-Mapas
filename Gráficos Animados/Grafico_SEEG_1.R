@@ -24,6 +24,7 @@ library(grid)
 library(data.table)
 library(devtools)
 library(hrbrthemes)
+library(ggthemes)
 library(scales)
 
 
@@ -151,19 +152,24 @@ anim_save("mutf.gif")
 # Salvando a animação em mp4
 av::av_encode_video(mutf_linha_anim2, output = "mutf.mp4")
 
+
 # Linha: Energia + Agropecuária (ENAGRO)
 enagro_linha <- ggplot(enagro, aes(x=Ano_num, y=Emissao, group=Categoria, color=Categoria)) +
   geom_line(size=1.2) +
-  labs(caption = "Emissão de CO2 (Mt) dos setores de Energia e \nAgropecuária por Ano no Brasil") +
-  theme(axis.text.x = element_text(angle = 30, vjust = .5, size = 14),
-        axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = 1, vjust = 0, face = "plain"),
-        axis.title.x = element_text(size = 16),
-        axis.title.y = element_text(size = 16),
-        legend.title = element_text(size=16),
-        legend.text = element_text(size=14),
-        plot.caption = element_text(color = "black", size = 15, face = "bold", hjust = 0),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_line(color = "gray80", size = 0.5))  +
+  theme_solarized_2(light=F) +
+  labs(title = "Emissão de CO2 (Mt) dos setores de Energia e Agropecuária por Ano no Brasil",
+       caption = "Fonte dos dados: SEEG, 2020.") +
+  theme(axis.text.x = element_text(angle = 30, vjust = .5, size = 14, colour="#EEEEEE"),
+        axis.text.y = element_text(color = "#EEEEEE", size = 14, angle = 0, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(size = 16, color = "#EEEEEE"),
+        axis.title.y = element_text(size = 16, color = "#EEEEEE"),
+        legend.background = element_blank(),
+        legend.key= element_blank(),
+        legend.title = element_text(size = 16, color = "#EEEEEE"),
+        legend.text = element_text(size = 14, color = "#EEEEEE"),
+        legend.position=c(0.10, 0.90), ## legend at top-left, inside the plot
+        plot.title = element_text(colour = "#EEEEEE", size = 20, face = "bold"),
+        plot.caption = element_text(color = "#EEEEEE", size = 13, hjust = 0)) +
   xlab("Anos") +
   ylab("Emissão de CO2") +
   scale_y_continuous(labels = label_number(suffix = " Mt", scale = 1e-6)) +
@@ -174,18 +180,21 @@ enagro_linha
 ggplotly(enagro_linha)
 
 # Definindo as informações de visualização da animação e chamando o resultado
-enagro_linha_anim <- enagro_linha + transition_reveal(Ano_num)
+enagro_linha_anim <- enagro_linha + transition_reveal(Ano_num) +
+  geom_text(aes(label = Categoria), vjust = -0.2, hjust = 1, colour = "white", size = 5) +
+  theme(legend.position = 'none') +
+  view_follow()
 enagro_linha_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-enagro_linha_anim2 <- animate(enagro_linha_anim, height = 600, width = 600, fps = 30, duration = 12, res = 100)
+enagro_linha_anim2 <- animate(enagro_linha_anim, height = 1200, width = 1200, fps = 30, duration = 12, res = 100, end_pause = 120)
 enagro_linha_anim2
 
 # Salvando a animação em gif
-anim_save("enagro.gif")
+anim_save("enagro2.gif")
 
 # Salvando a animação em mp4
-av::av_encode_video(enagro_linha_anim2, output = "enagro6.mp4")
+av::av_encode_video(enagro_linha_anim2, output = "enagro9.mp4")
 
 
 # GRÁFICOS DE BARRAS
@@ -197,8 +206,8 @@ Emissco2$Categoria <- factor(Emissco2$Categoria,
                                         "Processos Industriais",
                                         "Resíduos"))
 
-# Gráfico de Barras
-Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=percent, color=Categoria, fill=Categoria)) +
+# Gráfico de Barras: Porcentagem (%)
+Emissco2_barplt_pct <- ggplot(Emissco2, aes(x=Categoria, y=percent, color=Categoria, fill=Categoria)) +
   geom_bar(stat="identity") +
   scale_color_brewer(palette = "Set1") +
   scale_fill_brewer(palette = "Set1") +
@@ -215,25 +224,92 @@ Emissco2_barplt <- ggplot(Emissco2, aes(x=Categoria, y=percent, color=Categoria,
   xlab("Setores") +
   geom_text(aes(label = percent2), hjust = -0.2, colour = "black", size = 6) +
   coord_flip()
-Emissco2_barplt
-
-#---- "Mudança de uso\nda Terra e Florestas"
-#---- scale_y_discrete(labels = c("nome1", "nome2", ...) )
-#---- theme(legend.position="bottom")
-#---- ggtheme | ggpubr | View(theme_pubr)
+Emissco2_barplt_pct
 
 # Definindo as informações de visualização da animação e chamando o resultado
-Emissco2_barplt_anim <- Emissco2_barplt + transition_time(as.integer(Ano_num)) +
+Emissco2_barplt_pct_anim <- Emissco2_barplt_pct + transition_time(as.integer(Ano_num)) +
   ggtitle("ANO: {frame_time}")
   #labs(title = "ANO: {frame_time}")
-Emissco2_barplt_anim
+Emissco2_barplt_pct_anim
 
 # Definindo as configurações de renderização da animação e chamando o resultado
-Emissco2_barplt_anim2 <- animate(Emissco2_barplt_anim, height = 1200, width = 2400, fps = 30, duration = 12, res = 200)
+Emissco2_barplt_anim2 <- animate(Emissco2_barplt_pct_anim, height = 1200, width = 2400, fps = 30, duration = 12, res = 200)
 Emissco2_barplt_anim2
 
 # Salvando a animação em gif
 anim_save("Emissoes_bar.gif")
 
-# Salvando a animação
+# Salvando a animação em mp4
 av::av_encode_video(Emissco2_barplt_anim2, output = "Emissoes_barra6.mp4")
+
+
+# Gráfico de Barras: valores absolutos
+Emissco2_barplt_abs <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria, fill=Categoria)) +
+  geom_bar(stat="identity") +
+  #scale_color_brewer(palette = "Set1") +
+  #scale_fill_brewer(palette = "Set1") +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.text.x = element_text(angle = 0, vjust = .5, size = 14),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=16),
+        panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(color = "gray80", size = 0.5))  +
+  ylab("Emissão de CO2 no Brasil em Bilhões de Toneladas") +
+  xlab("Setores") +
+  scale_y_continuous(labels = label_number(suffix = " ", scale = 1e-9)) +
+  geom_text(aes(label = as.character(round(Emissao / 1000000000, 1))), hjust = -0.2, colour = "black", size = 6) +
+  coord_flip()
+Emissco2_barplt_abs
+
+# Definindo as informações de visualização da animação e chamando o resultado
+Emissco2_barplt_abs_anim <- Emissco2_barplt_abs + transition_time(as.integer(Ano_num)) +
+  ggtitle("ANO: {frame_time}") +
+  ease_aes('quadratic-in-out')
+Emissco2_barplt_abs_anim
+
+# Definindo as configurações de renderização da animação e chamando o resultado
+Emissco2_barplt_abs_anim2 <- animate(Emissco2_barplt_abs_anim, height = 1200, width = 2400, fps = 30, duration = 12, res = 200)
+Emissco2_barplt_abs_anim2
+
+# Salvando a animação em mp4
+av::av_encode_video(Emissco2_barplt_abs_anim2, output = "Emissoes_barra_abs1.mp4")
+
+
+# Gráfico de Barras: valores absolutos + legenda das categorias nas barras :)
+Emissco2_barplt_abs2 <- ggplot(Emissco2, aes(x=Categoria, y=Emissao, color=Categoria, fill=Categoria)) +
+  geom_bar(stat="identity") +
+  #scale_color_brewer(palette = "Set1") +
+  #scale_fill_brewer(palette = "Set1") +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.text.x = element_text(angle = 0, vjust = .5, size = 14),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=16),
+        panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(color = "gray80", size = 0.5))  +
+  ylab("Emissão de CO2 no Brasil em Bilhões de Toneladas") +
+  xlab("Setores") +
+  scale_y_continuous(labels = label_number(suffix = " ", scale = 1e-9)) +
+  geom_text(aes(label = Categoria), hjust = -0.1, colour = "black", size = 6) +
+  coord_flip()
+Emissco2_barplt_abs2
+
+# Definindo as informações de visualização da animação e chamando o resultado
+Emissco2_barplt_abs2_anim <- Emissco2_barplt_abs2 + transition_time(as.integer(Ano_num)) +
+  ggtitle("ANO: {frame_time}") +
+  ease_aes('quadratic-in-out')
+Emissco2_barplt_abs2_anim
+
+# Definindo as configurações de renderização da animação e chamando o resultado
+Emissco2_barplt_abs2_anim2 <- animate(Emissco2_barplt_abs2_anim, height = 1200, width = 2400, fps = 30, duration = 12, res = 200)
+Emissco2_barplt_abs2_anim2
+
+# Salvando a animação em mp4
+av::av_encode_video(Emissco2_barplt_abs2_anim2, output = "Emissoes_barra_abs.mp4")
