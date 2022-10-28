@@ -18,16 +18,16 @@ for (p in c("magrittr", "tidyverse", "readxl", "ggthemes", "magick", "animation"
 
 ### Importação e organização dos dados ####
 
-# Vamos utilizar os dados mensais de Campos-RJ (Código 83698) obtidos no Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET. 
+# Vamos utilizar os dados mensais de Campos-RJ (Código 83698) obtidos no Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET.
 # O BDMEP/INMET disponibiliza os dados no link: https://bdmep.inmet.gov.br/
 
 file1 = "dados_83698_M_1961-01-01_2021-12-31.csv"
 
 dados <- file1 %>% # Arquivo que será importado.
   read.csv(sep = ";", dec = ",", header = T, skip = 10, na.strings = "null") %>%   # Configuração da importação de dados.
-  
-  select(Data.Medicao, # Selecionando as colunas com as datas e a temperatura média compensanda. 
-         TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.)  %>%   
+
+  select(Data.Medicao, # Selecionando as colunas com as datas e a temperatura média compensanda.
+         TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.)  %>%
   rename(Data = "Data.Medicao",   # Renomeando as colunas.
          Tmc = "TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.") %>%
   separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-", remove = F) %>%   # Dividindo a coluna Data em 3: Ano, Mes e Dia.
@@ -35,18 +35,18 @@ dados <- file1 %>% # Arquivo que será importado.
          Mes = as.numeric(Mes),
          Dia = as.numeric(Dia))
 
-## Importação e organização das normais climatológicas (1961-1990) da temperatura média compensada (Tmc). 
+## Importação e organização das normais climatológicas (1961-1990) da temperatura média compensada (Tmc).
 file2 = "Temperatura-Media-Compensada_NCB_1961-1990.xls"
 
-Tmc.NC <- file2 %>% 
-  read_excel(sheet = 1, skip = 3, na = "-") %>% 
+Tmc.NC <- file2 %>%
+  read_excel(sheet = 1, skip = 3, na = "-") %>%
   filter(Código == 83698) %>%    # Selecionando os dados de Campos-RJ (Código 83698).
   select(Janeiro:Dezembro) %>%   # Selecionando as colunas de janeiro a dezembro.
-  
+
   # Pivotando os dados para obter duas colunas: Mês e Temperatura.
   pivot_longer(cols = everything(), # Selecionando todas as colunas.
                names_to = "MesN",   # Nome da coluna com os meses.
-               values_to = "Tmc") %>%   # Nome da coluna com as temperaturas. 
+               values_to = "Tmc") %>%   # Nome da coluna com as temperaturas.
   mutate("Mes" = 1:12, .before = Tmc)   # Adicionando uma coluna extra com o número dos meses, 1 a 12.
 
 ### Criando um data frame com as anomalias de temperatura.
@@ -55,10 +55,10 @@ dados.anomalias <- data.frame(Ano = as.numeric(dados$Ano),
                     Tmc.mensal = dados$Tmc,
                     Tmc.normal = Tmc.NC$Tmc,
                     Tmc.anomalias = dados$Tmc - Tmc.NC$Tmc)
-                              
-### Visualização - Espiral climática ### 
 
-# Primeiro vamos criar uma conexão dezembro-janeiro. 
+### Visualização - Espiral climática ###
+
+# Primeiro vamos criar uma conexão dezembro-janeiro.
 # Para isso, vamos criar um mês "zero" em cada ano, que representa o mês de dezembro do ano anterior.
 
 Tmc.mes0 <- dados.anomalias %>%
@@ -71,10 +71,11 @@ v.seq <- 1:sum(c(nrow(dados.anomalias), nrow(Tmc.mes0)))
 
 # Agora vamos Unir os dados.
 
-dados.mes0 <- dados.anomalias %>%
-  rbind(Tmc.mes0) %>%
-  arrange(Ano, Mes) %>%
-  cbind(v.seq)
+dados.plot <-
+  dados.anomalias %>%
+    rbind(Tmc.mes0) %>%
+    arrange(Ano, Mes) %>%
+    cbind(v.seq)
 
 # Criando um data frame com os valores (-2 a +2) para legenda.
 Legenda <- data.frame(
@@ -89,7 +90,7 @@ Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
 # Defina uma pasta onde serão plotados todos os frames.
 setwd("./Anim")
 
-# Agora vamos remover o Mes 0 criado anteriormente.
+# Criando vetor para filtar o "Mes 0" do gráfico, evitando duplicações
 frames <- data.frame(v.seq,
                      multiplo13 = if_else(v.seq %% 13 == 0,
                                           print("True"),
@@ -97,7 +98,7 @@ frames <- data.frame(v.seq,
 frames %>%
   filter(multiplo13 != "True") %>%
   filter(v.seq >= 13) %$%
-  print(frames) -> frames.f
+  as.vector(v.seq) -> frames.f
 
 ## Plotando os frames ##
 
@@ -105,7 +106,7 @@ frames %>%
 
 for(i in frames.f){
   alpha = c(rep(0.15, times = i - 11), seq(0.15, 1, by = 1/12))
-  ggplot(dados.mes0 %>% filter(frames.f <= i),
+  ggplot(dados.mes0 %>% filter(v.seq <= i),
          aes(x = Mes, y = Tmc.anomalias, group = Ano, color = Tmc.anomalias)) +
     geom_hline(yintercept = -2, color = "DarkBlue", size = 1.3, alpha = 0.5) +
     geom_hline(yintercept = -1, color = "#ad84ff", size = 1.3, alpha = 0.5) +
@@ -113,7 +114,7 @@ for(i in frames.f){
     geom_hline(yintercept = 1, color = "#ffa286", size = 1.3, alpha = 0.5) +
     geom_hline(yintercept = +2, color = "DarkRed", size = 1.3, alpha = 0.5) +
     geom_label(data = Legenda, aes(x = x, y = y, label = labels),
-               inherit.aes = F, 
+               inherit.aes = F,
                color = c("DarkBlue", "#ad84ff", "White", "#ffa286", "DarkRed"),
                fill = "Black", label.size = 0, size = 3, alpha = 0.5) +
     geom_label(aes(x = 0, y = -10, label = Ano),
