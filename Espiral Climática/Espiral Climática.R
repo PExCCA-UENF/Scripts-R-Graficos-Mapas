@@ -88,7 +88,7 @@ Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
            "jul", "ago", "set", "out", "nov", "dez")
 
 # Defina uma pasta onde serão plotados todos os frames.
-setwd("./Anim")
+setwd("./Espiral Climática/Anim/")
 
 # Criando vetor para filtar o "Mes 0" do gráfico, evitando duplicações
 frames <- data.frame(v.seq,
@@ -101,6 +101,7 @@ frames %>%
   as.vector(v.seq) -> frames.f
 
 ## Plotando os frames ##
+
 
 # ATENÇÃO! Esta etapa demanda tempo.
 
