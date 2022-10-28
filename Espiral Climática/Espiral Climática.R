@@ -106,7 +106,7 @@ frames %>%
 
 for(i in frames.f){
   alpha = c(rep(0.15, times = i - 11), seq(0.15, 1, by = 1/12))
-  ggplot(dados.mes0 %>% filter(v.seq <= i),
+  ggplot(dados.plot %>% filter(v.seq <= i),
          aes(x = Mes, y = Tmc.anomalias, group = Ano, color = Tmc.anomalias)) +
     geom_hline(yintercept = -2, color = "DarkBlue", size = 1.3, alpha = 0.5) +
     geom_hline(yintercept = -1, color = "#ad84ff", size = 1.3, alpha = 0.5) +
