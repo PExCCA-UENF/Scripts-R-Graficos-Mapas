@@ -10,6 +10,7 @@ library(magrittr) ## utilizado para manipular dados, pipe %$%
 # Importação dos Dados #####
 
 ## Tabela Inicial
+# setwd("D:/GDrive/R/PExCCA-LAMET/Scripts/Scripts-Graficos-R/Espiral Climática/v2")
 
 Dados <-
   read.csv(file = "Campos.csv", # Seleciona o arquivo
@@ -36,7 +37,7 @@ Dados <-
 
 ## Importação de tabela de médias normais 1961-1990
 T_Med_Normal <-
-  read_excel("Normais.xls",
+  read_excel("Temperatura-Media-Compensada_NCB_1961-1990.xlsx",
              sheet = 1, skip = 3, na = "-")
 
 ## Limpando os dados: separando apenas a linha de interesse e pivotando para formatar
@@ -86,7 +87,7 @@ T_Med_Anomalias <-
     Data = T_Med_Mensal$Data,
     T_Med_Mensal_ = T_Med_Mensal$TmedM,
     T_Med_Normal_ = rep(T_Med_Normal$Tmed, diff(range(Dados$Ano))+1 ),
-    Dif_T_M =   T_Med_Mensal$TmedM - rep(T_Med_Normal$Tmed, diff(range(Dados$Ano))+1 )
+    Anomalias =   T_Med_Mensal$TmedM - rep(T_Med_Normal$Tmed, diff(range(Dados$Ano))+1 )
   )
 
 
@@ -128,7 +129,7 @@ ggsave("Anomalias_Normais.png", width = 2000, height = 1600, units = "px", bg = 
 ## Visualizando evolução da diferença através dos anos
 
 ggplot(T_Med_Anomalias,
-       aes(x = Ano, y = Dif_T_M, group = Ano)) +
+       aes(x = Ano, y = Anomalias, group = Ano)) +
   geom_boxplot() +
   scale_y_continuous(breaks = -5:5, limits = c(-5,5)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
@@ -137,7 +138,7 @@ ggplot(T_Med_Anomalias,
 ggsave("Anomalias_Temp_Bx.png", width = 2000, height = 1600, units = "px", bg = "white")
 
 ggplot(T_Med_Anomalias,
-       aes(x = Ano, y = Dif_T_M)) +
+       aes(x = Ano, y = Anomalias)) +
   geom_point() +
   geom_smooth(method = "lm", color = "Red") +
   ggpmisc::stat_poly_eq(formula = y ~ x, color = "Red",
@@ -218,14 +219,31 @@ frames %>%
   filter(frames >= 13) %$%
   print(frames) -> frames
 
+### Um teste de gráfico diferente ####
+# Caso use esta tabela para o gráfico, e Anomalias_C para cores,
+# teremos uma escala onde o valor máximo e minimo das cores fica preso em -1.5 a 1.5
+# O objetivo é reduzir a quantidade de branco no gráfico final, ressalntando as anomalias
+
+# Dados_Pl_EscalaFixa <-
+#   Dados_Pl %>%
+#     mutate(Anomalias_C = if_else(Anomalias > 1.5, 1.5, Anomalias),
+#            Anomalias_C = if_else(Anomalias < -1.5, -1.5, Anomalias))
+
 ## Plotando os frames ####
 # ATENÇÃO ESTA ETAPA DEMANDA TEMPO
 
+# Loop for para gerar cada frame de uma vez
 for(i in frames){
-  alpha = c(rep(0.15, times = i - 11), seq(0.15, 1, by = 1/12))
-  ggplot(Dados_Pl %>% filter(frames <= i),
-         aes(x = Mes, y = Dif_T_M,
-             group = Ano, color = Dif_T_M)) +
+  # Para gerar efeito visual de linha do instante atual mais acesa, usei valores de alpha dependentes do frame
+  # O ggplot utiliza ou uma sequencia de i valores de alpha dado i pontos no gráfico ou um valor único.
+  # Crio um vetor com i valores, sendo os primeiros (anos anteriores) fixos em 0.3, e os mais novos, uma sequencia de 0.3 a 1.
+  # Assim os valores do frame mais recente são exibidos sem transparencia, bastante opacos.
+  alpha = c(rep(0.3, times = i - 10), seq(0.3, 1, by = 1/12))
+  # Inicio o gráfico, solicitando um filtro dado a coluna frame <= a i (do loop)
+  ggplot(Dados_Pl_EscalaFixa %>% filter(frames <= i),
+         aes(x = Mes, y = Anomalias,
+             group = Ano, color = Anomalias_C)) +
+    # Linhas -2 a +2 de escala do gráfico e legenda
     geom_hline(yintercept = -2, color = "DarkBlue", size = 1.3, alpha = 0.5) +
     geom_hline(yintercept = -1, color = "#ad84ff", size = 1.3, alpha = 0.5) +
     geom_hline(yintercept = 0, color = "White", size = 1.3, alpha = 0.5) +
@@ -236,16 +254,23 @@ for(i in frames){
                inherit.aes = F,
                color = c("DarkBlue", "#ad84ff", "White", "#ffa286", "DarkRed"),
                fill = "Black", label.size = 0, size = 3, alpha = 0.5) +
-    geom_label(aes(x = 0, y = -10, label = Ano),
+    # Legenda no centro do gráfico com o Ano
+    geom_label(aes(x = 0, y = -6, label = Ano),
                size = 10, fill = "black", label.size = 0) +
+    # Linha e pontos principais
     geom_line(size = 1.2, alpha = alpha) +
     geom_point(alpha = alpha) +
+    # Gradiente de cor para o gráfico
     scale_color_gradient2(low = "darkblue", high = "darkred",
                           midpoint = 0, guide = "none") +
+    # Define manualmente a escala de 1 a 12 para excluir o "mes 0" e adiciona as legendas jan-dez
     scale_x_continuous(breaks = 1:12,
-                       labels = toupper(Meses)) +
-    scale_y_continuous(limits = c(-10, 4)) +
+                       labels = toupper(Meses)) + #toupper() para escrever os meses com letra maiuscula
+    # Aletra a escala y para aprimorar o visual do gráfico (entendo que seja sujeito a criticas, mecher na escala)
+    scale_y_continuous(limits = c(-6, 3)) +
+    # Define gráfico circular
     coord_polar(start = -2*pi/12) +
+    # Personalização do tema
     theme(
       panel.background = element_rect(fill = "Gray10"),
       plot.background = element_rect(fill = "Gray10"),
@@ -256,6 +281,7 @@ for(i in frames){
       axis.title.x = element_blank(),
       axis.ticks = element_blank()
     )
+  # Salva cada plot no loop for dentro da pasta
   ggsave(filename = paste("Spiral_Frame_", i+100, # Somo 100 ao i para evitar problemas no ordenamento das strings com nome dos frames
                           ".png", sep = ""),
          width = 1600, height = 1600,
@@ -307,25 +333,33 @@ animation::saveVideo(
   other.opts = opts
 )
 
+# Heatmap ####
+
+if(!require(TSstudio)){install.packages("TSstudio")}; library(TSstudio)
+if(!require(RColorBrewer)){install.packages("RColorBrewer")}; library(RColorBrewer)
+
+datats <-
+  ts(T_Med_Anomalias$Anomalias, frequency = 12,
+     start = c(1981, 1), end = c(2021, 12))
+ts_heatmap(ts.obj = datats,
+           padding = T,
+           color = "BuRd",
+           title = "Anomalias de Climáticas Campos-RJ")
 
 # EXTRA: Grafico interativo em html ####
-
-library(plotly)
-
-T_Med_Anomalias %>%
-  mutate(raio = Dif_T_M + 10,
-         theta = 2 * pi * (Mes - 1) / 12,
-         x = raio * sin(theta),
-         y = raio * cos(theta)) %>%
-  plot_ly(data = .,
-          x = ~x, y = ~y, z = ~Data,
-          type = "scatter3d",
-          mode = "lines", sizes = 3,
-          line = list(width = 6, color = ~Dif_T_M,
-                      colorscale = list(c(min(T_Med_Anomalias$Dif_T_M)+10, "blue"),
-                                        c(max(T_Med_Anomalias$Dif_T_M)+10, "red")))
-  )
-
-
-
-
+#
+# library(plotly)
+#
+# T_Med_Anomalias %>%
+#   mutate(raio = Anomalias + 10,
+#          theta = 2 * pi * (Mes - 1) / 12,
+#          x = raio * sin(theta),
+#          y = raio * cos(theta)) %>%
+#   plot_ly(data = .,
+#           x = ~x, y = ~y, z = ~Data,
+#           type = "scatter3d",
+#           mode = "lines", sizes = 3,
+#           line = list(width = 6, color = ~Anomalias,
+#                       colorscale = list(c(min(T_Med_Anomalias$Anomalias)+10, "blue"),
+#                                         c(max(T_Med_Anomalias$Anomalias)+10, "red")))
+#   )
