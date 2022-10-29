@@ -1,49 +1,57 @@
-#=============================================================================================================================
+#===============================================================================#
 # PROJETO DE EXTENSÃO "PROCESSAMENTO E ANÁLISE DE DADOS AMBIENTAIS COM R"
 # E-mail: pexcca.lamet@uenf.br
-#=============================================================================================================================
+#===============================================================================#
 
-##### ESPIRAL CLIMÁTICA #####
+#=============================== ESPIRAL CLIMÁTICA =============================#
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
-# Atualização: 28/10/2022
+# Atualização: 29/10/2022
 
-## Para instalar as bibliotecas necessárias, use os comandos abaixo:
-for (p in c("magrittr", "tidyverse", "readxl", "ggthemes", "magick", "animation")) {
+### Para instalar as bibliotecas necessárias, use os comandos abaixo:
+for (p in c("magrittr", "tidyverse", "readxl",
+            "ggthemes", "magick", "animation")) {
   if (!require(p, character.only = T)) {
     install.packages(p, character = T)
   }
   library(p, quietly = T, character.only = T)
 }
 
-### Importação e organização dos dados ####
+### Importação e organização dos dados.
 
-# Vamos utilizar os dados mensais de Campos-RJ (Código 83698) obtidos no Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET.
+# Vamos utilizar os dados mensais de Campos-RJ (Código 83698) obtidos no
+# Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET.
 # O BDMEP/INMET disponibiliza os dados no link: https://bdmep.inmet.gov.br/
 
-file1 = "dados_83698_M_1961-01-01_2021-12-31.csv"
+file1 = "dados_83698_M_1961-01-01_2021-12-31.csv" # Arquivo que será importado.
 
-dados <- file1 %>% # Arquivo que será importado.
-  read.csv(sep = ";", dec = ",", header = T, skip = 10, na.strings = "null") %>%   # Configuração da importação de dados.
-
-  select(Data.Medicao, # Selecionando as colunas com as datas e a temperatura média compensanda.
+dados <- file1 %>%
+  read.csv(sep = ";", dec = ",", header = T, skip = 10,
+           na.strings = "null") %>%
+  # Selecionando e renomeando as colunas com as datas e a temperatura média compensada (Tmc).
+  select(Data.Medicao,
          TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.)  %>%
   rename(Data = "Data.Medicao",   # Renomeando as colunas.
          Tmc = "TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.") %>%
-  separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-", remove = F) %>%   # Dividindo a coluna Data em 3: Ano, Mes e Dia.
+  # Dividindo a coluna Data em 3: Ano, Mes e Dia.
+  separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-", remove = F) %>%
   mutate(Ano = as.numeric(Ano),
          Mes = as.numeric(Mes),
-         Dia = as.numeric(Dia))
+         Dia = as.numeric(Dia)) %>%
+  # Selecionando os dados a partir de 1991.
+  filter(Ano >= 1991)
 
 ## Importação e organização das normais climatológicas (1961-1990) da temperatura média compensada (Tmc).
-file2 = "Temperatura-Media-Compensada_NCB_1961-1990.xls"
+# Link para baixar os dados: https://portal.inmet.gov.br/uploads/normais/Temperatura-Media-Compensada_NCB_1961-1990.xls
+
+file2 = "Temperatura-Media-Compensada_NCB_1961-1990.xls" # Arquivo que será importado.
 
 Tmc.NC <- file2 %>%
   read_excel(sheet = 1, skip = 3, na = "-") %>%
   filter(Código == 83698) %>%    # Selecionando os dados de Campos-RJ (Código 83698).
   select(Janeiro:Dezembro) %>%   # Selecionando as colunas de janeiro a dezembro.
 
-  # Pivotando os dados para obter duas colunas: Mês e Temperatura.
+# Pivotando os dados para obter duas colunas: Mês e Temperatura.
   pivot_longer(cols = everything(), # Selecionando todas as colunas.
                names_to = "MesN",   # Nome da coluna com os meses.
                values_to = "Tmc") %>%   # Nome da coluna com as temperaturas.
@@ -66,31 +74,29 @@ Tmc.mes0 <- dados.anomalias %>%
   mutate(Ano = Ano + 1, Mes = 0)
 
 # Em seguida, crie um vetor com um sequência de números para funcionar como contagem de frames.
-
 v.seq <- 1:sum(c(nrow(dados.anomalias), nrow(Tmc.mes0)))
 
 # Agora vamos Unir os dados.
-
 dados.plot <-
   dados.anomalias %>%
     rbind(Tmc.mes0) %>%
     arrange(Ano, Mes) %>%
     cbind(v.seq)
 
-# Criando um data frame com os valores (-2 a +2) para legenda.
+# Crie um data frame com os valores (-2 a +2) para legenda.
 Legenda <- data.frame(
   x = 1,
   y = seq(from = -2, to = 2, by = 1),
   labels = c("-2\u00B0C", "-1\u00B0C", "0\u00B0C", "+1\u00B0C", "+2\u00B0C"))
 
-# Criando um vetor com os meses para legenda.
+# Crie um vetor com os meses para legenda.
 Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
            "jul", "ago", "set", "out", "nov", "dez")
 
 # Defina uma pasta onde serão plotados todos os frames.
-setwd("./Espiral Climática/Anim/")
+setwd("./Anim/")
 
-# Criando vetor para filtar o "Mes 0" do gráfico, evitando duplicações
+# Crie um vetor para filtrar o "Mes 0" do gráfico para não ter duplicações.
 frames <- data.frame(v.seq,
                      multiplo13 = if_else(v.seq %% 13 == 0,
                                           print("True"),
@@ -100,9 +106,7 @@ frames %>%
   filter(v.seq >= 13) %$%
   as.vector(v.seq) -> frames.f
 
-## Plotando os frames ##
-
-
+## Plotando e salvando os frames ##
 # ATENÇÃO! Esta etapa demanda tempo.
 
 for(i in frames.f){
@@ -138,53 +142,46 @@ for(i in frames.f){
       axis.title.x = element_blank(),
       axis.ticks = element_blank()
     )
-  ggsave(filename = paste("Spiral_Frame_", i+100, # Somo 100 ao i para evitar problemas no ordenamento das strings com nome dos frames
+  ggsave(filename = paste("Spiral_Frame_", i+100, # Acrescentamos 100 ao i para evitar problemas no ordenamento de strings com os nomes dos frames.
                           ".png", sep = ""),
          width = 1600, height = 1600,
          units = "px", bg = "Gray10")
 }
 
-## Animando o gráfico ##
+### Criando um vídeo a partir das imagens ###
 
-# Devemos ter instalado no computador o ffmpeg e o ImageMagick para o devido
-# funcionamento desta etapa. Não tenho certeza sobre a necessidade do ImageMagick,
-# mas como ele já estava instalado em minha máquina, recomendo sua instalação.
+# Devemos ter instalado no computador o FFmpeg  para o devido funcionamento desta etapa.
+# Recomendamos a leitura do seguinte manual: https://edisciplinas.usp.br/pluginfile.php/342677/mod_resource/content/0/ffmpeg_traduzido_rev_14736.pdf
 
-# Indicando o caminho do FFmpeg para o pacote animation
-animation::ani.options(ffmpeg = shortPathName("C:/Program Files (x86)/FFMPEG/bin/ffmpeg.exe"))
+# Precisamos indicar o caminho do FFmpeg para o pacote animation:
+animation::ani.options(ffmpeg = shortPathName("C:/ffmpeg/bin/ffmpeg.exe"))
 
-# Criando um vetor com o nome dos arquivos. Todos seguem o padrão "Spiral_Frame_".
+# Crie um vetor com o nome dos arquivos.
 Frames <- list.files(pattern = "Spiral_Frame_", all.files = TRUE, recursive = F)
 
-# Extraíndo parâmetros dos frames que seram utilizados no processo.
+# Agora vamos extrair os parâmetros dos frames que serão utilizados no processo.
 img.height <- magick::image_info(image_read(Frames[1]))$height
 img.width <- magick::image_info(image_read(Frames[1]))$width
 img.type <- magick::image_info(image_read(Frames[1]))$format
 
-# Definindo alguns parametros para o funcionamento adequado do FFmpeg.
+# Definição de alguns parâmetros e configurações gráficas.
+animation::ani.options(interval = 0.1, # Intervalo entre os frames em segundos.
+                       ani.height = img.height,
+                       ani.width = img.width,
+                       ani.dev = tolower(img.type),
+                       ani.type = tolower(img.type))
 
-animation::ani.options(interval = 0.1, # Intervalo entre os frames em segundos
-                       ani.height = img.height, # Dimensões das imagens
-                       ani.width = img.width, # Dimensões das imagens
-                       ani.dev = tolower(img.type), # Definindo a 'engine' à ser utilizada
-                       ani.type = tolower(img.type)) # Definindo a 'engine' à ser utilizada
-
-# Definindo vetor de configuração para ampliar a resolução das imagens.
-# Utilizaremos na função saveVideo()
 opts <- paste("-s ", img.height*2.5, "x", img.width*2.5, sep = "")
 
 animation::saveVideo(
-  # Loop pelos Frames, adicionando um a cada vez.
-  for(i in 1:length(Frames)){
-    # Lê o Frame.
+  for(i in 1:length(Frames)){ # Loop dos Frames.
     Frame <- magick::image_read(Frames[i])
-    # Plota o Frame.
     plot(Frame)
   },
-  # Definindo o nome do arquivo
-  video.name = "Animacao.avi",
-  # Define os parametros extas salvos anteriormente
+  video.name = "Animacao.avi", # Definindo o nome do arquivo de saída.
   other.opts = opts
 )
 
+# Agradecemos o Jason Mercer por explicar como fazer um vídeo no R a partir de imagens estáticas.
+# Link: https://wetlandscapes.github.io/blog/blog/making-movie-in-r-from-still-images/
 
