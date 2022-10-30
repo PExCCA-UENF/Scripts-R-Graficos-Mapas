@@ -1,9 +1,9 @@
-#===============================================================================#
+#======================================================================================
 # PROJETO DE EXTENSÃO "PROCESSAMENTO E ANÁLISE DE DADOS AMBIENTAIS COM R"
 # E-mail: pexcca.lamet@uenf.br
-#===============================================================================#
+#======================================================================================
 
-#=============================== ESPIRAL CLIMÁTICA =============================#
+#---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
 # Atualização: 29/10/2022
@@ -73,7 +73,7 @@ Tmc.mes0 <- dados.anomalias %>%
   filter(Mes == 12) %>%
   mutate(Ano = Ano + 1, Mes = 0)
 
-# Em seguida, crie um vetor com um sequência de números para funcionar como contagem de frames.
+# Em seguida, crie um vetor com uma sequência de números para funcionar como contagem de frames.
 v.seq <- 1:sum(c(nrow(dados.anomalias), nrow(Tmc.mes0)))
 
 # Agora vamos Unir os dados.
@@ -150,7 +150,10 @@ for(i in frames.f){
 
 ### Criando um vídeo a partir das imagens ###
 
-# Devemos ter instalado no computador o FFmpeg  para o devido funcionamento desta etapa.
+# Agradecemos ao Jason Mercer por explicar como fazer um vídeo no R a partir de imagens estáticas.
+# Link: https://wetlandscapes.github.io/blog/blog/making-movie-in-r-from-still-images/
+
+# ATENÇÃO!!! Devemos ter instalado no computador o FFmpeg  para o devido funcionamento desta etapa.
 # Recomendamos a leitura do seguinte manual: https://edisciplinas.usp.br/pluginfile.php/342677/mod_resource/content/0/ffmpeg_traduzido_rev_14736.pdf
 
 # Precisamos indicar o caminho do FFmpeg para o pacote animation:
@@ -182,6 +185,4 @@ animation::saveVideo(
   other.opts = opts
 )
 
-# Agradecemos o Jason Mercer por explicar como fazer um vídeo no R a partir de imagens estáticas.
-# Link: https://wetlandscapes.github.io/blog/blog/making-movie-in-r-from-still-images/
 
