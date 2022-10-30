@@ -7,6 +7,7 @@
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
 # Atualização: 29/10/2022
+#--------------------------------------------------------------------------------------
 
 ### Para instalar as bibliotecas necessárias, use os comandos abaixo:
 for (p in c("magrittr", "tidyverse", "readxl",
