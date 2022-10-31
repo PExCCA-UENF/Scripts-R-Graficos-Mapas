@@ -52,7 +52,7 @@ Tmc.NC <- file2 %>%
   filter(Código == 83698) %>%    # Selecionando os dados de Campos-RJ (Código 83698).
   select(Janeiro:Dezembro) %>%   # Selecionando as colunas de janeiro a dezembro.
 
-# Pivotando os dados para obter duas colunas: Mês e Temperatura.
+  # Pivotando os dados para obter duas colunas: Mês e Temperatura.
   pivot_longer(cols = everything(), # Selecionando todas as colunas.
                names_to = "MesN",   # Nome da coluna com os meses.
                values_to = "Tmc") %>%   # Nome da coluna com as temperaturas.
