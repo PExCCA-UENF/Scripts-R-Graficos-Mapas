@@ -151,7 +151,7 @@ for(i in frames.f){
 
 ### Criando um vídeo a partir das imagens ###
 
-# Agradecemos ao Jason Mercer por explicar como fazer um vídeo no R a partir de imagens estáticas.
+# Para fazer um vídeo no R a partir de imagens estáticas, utilizamos os comandos disponibilizados por Jason Mercer.
 # Link: https://wetlandscapes.github.io/blog/blog/making-movie-in-r-from-still-images/
 
 # ATENÇÃO!!! Devemos ter instalado no computador o FFmpeg  para o devido funcionamento desta etapa.
