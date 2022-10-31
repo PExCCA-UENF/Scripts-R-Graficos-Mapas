@@ -94,8 +94,8 @@ Legenda <- data.frame(
 Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
            "jul", "ago", "set", "out", "nov", "dez")
 
-# Defina uma pasta onde serão plotados todos os frames.
-setwd("./Anim/")
+# Crie uma pasta no seu computador para salvar os frames, vamos denominar a pasta de "Anim".
+setwd("./Espiral Climática/Anim/") # Definindo a pasta "Anim" como diretório de trabalho.
 
 # Crie um vetor para filtrar o "Mes 0" do gráfico para não ter duplicações.
 frames <- data.frame(v.seq,
