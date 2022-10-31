@@ -186,4 +186,4 @@ animation::saveVideo(
   other.opts = opts
 )
 
-
+### Para mais informações, dúvidas e/ou sugestões, e-mail para contato: pexcca.lamet@uenf.br
