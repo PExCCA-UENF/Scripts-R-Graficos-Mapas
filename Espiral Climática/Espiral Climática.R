@@ -6,7 +6,7 @@
 #---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
-# Atualização: 29/10/2022
+# Atualização: 31/10/2022
 #--------------------------------------------------------------------------------------
 
 ### Para instalar as bibliotecas necessárias, use os comandos abaixo:
@@ -28,12 +28,12 @@ file1 = "dados_83698_M_1961-01-01_2021-12-31.csv" # Arquivo que será importado.
 
 dados <- file1 %>%
   read.csv(sep = ";", dec = ",", header = T, skip = 10,
-           na.strings = "null") %>%
+           na.strings = "null", check.names = F) %>%
   # Selecionando e renomeando as colunas com as datas e a temperatura média compensada (Tmc).
-  select(Data.Medicao,
-         TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.)  %>%
-  rename(Data = "Data.Medicao",   # Renomeando as colunas.
-         Tmc = "TEMPERATURA.MEDIA.COMPENSADA..MENSAL..C.") %>%
+  select("Data Medicao",
+         "TEMPERATURA MEDIA COMPENSADA, MENSAL(°C)")  %>%
+  rename(Data = "Data Medicao",   # Renomeando as colunas.
+         Tmc = "TEMPERATURA MEDIA COMPENSADA, MENSAL(°C)" ) %>%
   # Dividindo a coluna Data em 3: Ano, Mes e Dia.
   separate(col = Data, into = c("Ano", "Mes", "Dia"), sep = "-", remove = F) %>%
   mutate(Ano = as.numeric(Ano),
@@ -94,8 +94,9 @@ Legenda <- data.frame(
 Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
            "jul", "ago", "set", "out", "nov", "dez")
 
-# Crie uma pasta no seu computador para salvar os frames, vamos denominar a pasta de "Anim".
-setwd("./Espiral Climática/Anim/") # Definindo a pasta "Anim" como diretório de trabalho.
+# Crie uma pasta no seu computador e a defina como diretório de trabalho para salvar os frames, vamos denominar a pasta de "Anim".
+dir.create(path = "Anim") # Cria a pasta "Anim"
+setwd("./Anim/") # Definindo a pasta "Anim" como diretório de trabalho.
 
 # Crie um vetor para filtrar o "Mes 0" do gráfico para não ter duplicações.
 frames <- data.frame(v.seq,
