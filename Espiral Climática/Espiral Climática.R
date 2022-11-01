@@ -6,7 +6,7 @@
 #---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
-# Atualização: 31/10/2022
+# Atualização: 01/11/2022
 #--------------------------------------------------------------------------------------
 
 ### Para instalar as bibliotecas necessárias, use os comandos abaixo:
