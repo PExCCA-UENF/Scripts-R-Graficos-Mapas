@@ -24,7 +24,7 @@ for (p in c("magrittr", "tidyverse", "readxl",
 # Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET.
 # O BDMEP/INMET disponibiliza os dados no link: https://bdmep.inmet.gov.br/
 
-file1 = "dados_83698_M_1961-01-01_2021-12-31.csv" # Arquivo que será importado.
+file1 = "./Espiral Climática/dados_83698_M_1961-01-01_2021-12-31.csv" # Arquivo que será importado.
 
 dados <- file1 %>%
   read.csv(sep = ";", dec = ",", header = T, skip = 10,
@@ -45,7 +45,7 @@ dados <- file1 %>%
 ## Importação e organização das normais climatológicas (1961-1990) da temperatura média compensada (Tmc).
 # Link para baixar os dados: https://portal.inmet.gov.br/uploads/normais/Temperatura-Media-Compensada_NCB_1961-1990.xls
 
-file2 = "Temperatura-Media-Compensada_NCB_1961-1990.xls" # Arquivo que será importado.
+file2 = "./Espiral Climática/Temperatura-Media-Compensada_NCB_1961-1990.xls" # Arquivo que será importado.
 
 Tmc.NC <- file2 %>%
   read_excel(sheet = 1, skip = 3, na = "-") %>%
@@ -95,8 +95,8 @@ Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
            "jul", "ago", "set", "out", "nov", "dez")
 
 # Crie uma pasta no seu computador e a defina como diretório de trabalho para salvar os frames, vamos denominar a pasta de "Anim".
-dir.create(path = "Anim") # Cria a pasta "Anim"
-setwd("./Anim/") # Definindo a pasta "Anim" como diretório de trabalho.
+dir.create(path = "./Espiral Climática/Anim") # Criando uma pasta denominada "Anim".
+setwd("./Espiral Climática/Anim/") # Definindo a pasta "Anim" como diretório de trabalho.
 
 # Crie um vetor para filtrar o "Mes 0" do gráfico para não ter duplicações.
 frames <- data.frame(v.seq,
