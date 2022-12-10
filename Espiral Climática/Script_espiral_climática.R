@@ -6,12 +6,12 @@
 #---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
-# Atualização: 01/11/2022
+# Atualização: 04/12/2022
 #--------------------------------------------------------------------------------------
 
 ### Para instalar as bibliotecas necessárias, use os comandos abaixo:
 for (p in c("magrittr", "tidyverse", "readxl",
-            "ggthemes", "magick", "animation")) {
+            "ggthemes", "av")) {
   if (!require(p, character.only = T)) {
     install.packages(p, character = T)
   }
@@ -152,39 +152,7 @@ for(i in frames.f){
 
 ### Criando um vídeo a partir das imagens ###
 
-# Para fazer um vídeo no R a partir de imagens estáticas, utilizamos os comandos abaixo disponibilizados por Jason Mercer.
-# Link: https://wetlandscapes.github.io/blog/blog/making-movie-in-r-from-still-images/
-
-# ATENÇÃO!!! Devemos ter instalado no computador o FFmpeg  para o devido funcionamento desta etapa.
-# Recomendamos a leitura do seguinte manual: https://edisciplinas.usp.br/pluginfile.php/342677/mod_resource/content/0/ffmpeg_traduzido_rev_14736.pdf
-
-# Precisamos indicar o caminho do FFmpeg para o pacote animation:
-animation::ani.options(ffmpeg = shortPathName("C:/ffmpeg/bin/ffmpeg.exe"))
-
-# Crie um vetor com o nome dos arquivos.
-Frames <- list.files(pattern = "Spiral_Frame_", all.files = TRUE, recursive = F)
-
-# Agora vamos extrair os parâmetros dos frames que serão utilizados no processo.
-img.height <- magick::image_info(image_read(Frames[1]))$height
-img.width <- magick::image_info(image_read(Frames[1]))$width
-img.type <- magick::image_info(image_read(Frames[1]))$format
-
-# Definição de alguns parâmetros e configurações gráficas.
-animation::ani.options(interval = 0.1, # Intervalo entre os frames em segundos.
-                       ani.height = img.height,
-                       ani.width = img.width,
-                       ani.dev = tolower(img.type),
-                       ani.type = tolower(img.type))
-
-opts <- paste("-s ", img.height*2.5, "x", img.width*2.5, sep = "")
-
-animation::saveVideo(
-  for(i in 1:length(Frames)){ # Loop dos Frames.
-    Frame <- magick::image_read(Frames[i])
-    plot(Frame)
-  },
-  video.name = "Animacao.avi", # Definindo o nome do arquivo de saída.
-  other.opts = opts
-)
+images <- list.files(path = "./Espiral Climática/Anim/", pattern = "Spiral")
+av::av_encode_video(input = images, output = "Spiral.mp4")
 
 ### Para mais informações, dúvidas e/ou sugestões, e-mail para contato: pexcca.lamet@uenf.br
