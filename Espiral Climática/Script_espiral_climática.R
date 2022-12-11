@@ -6,12 +6,12 @@
 #---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
 # Elaboração: Nícolas C. Nogueira
 # Revisão: Profa. Eliane B. Santos
-# Atualização: 04/12/2022
+# Atualização: 10/12/2022
 #--------------------------------------------------------------------------------------
 
 ### Para instalar as bibliotecas necessárias, use os comandos abaixo:
-for (p in c("magrittr", "tidyverse", "readxl",
-            "ggthemes", "av")) {
+for (p in c("magrittr", "tidyverse", "lubridate",
+            "readxl", "ggthemes", "av")) {
   if (!require(p, character.only = T)) {
     install.packages(p, character = T)
   }
@@ -91,8 +91,9 @@ Legenda <- data.frame(
   labels = c("-2\u00B0C", "-1\u00B0C", "0\u00B0C", "+1\u00B0C", "+2\u00B0C"))
 
 # Crie um vetor com os meses para legenda.
-Meses <- c("jan", "fev", "mar", "abr", "mai", "jun",
-           "jul", "ago", "set", "out", "nov", "dez")
+Meses <- month(1:12,
+               label = TRUE, 
+               locale = "pt_BR")
 
 # Crie uma pasta no seu computador e a defina como diretório de trabalho para salvar os frames, vamos denominar a pasta de "Anim".
 dir.create(path = "./Espiral Climática/Anim") # Criando uma pasta denominada "Anim".
@@ -151,8 +152,9 @@ for(i in frames.f){
 }
 
 ### Criando um vídeo a partir das imagens ###
+images <- list.files(pattern = "Spiral_Frame_",
+                     all.files = TRUE, recursive = FALSE)
 
-images <- list.files(path = "./Espiral Climática/Anim/", pattern = "Spiral")
 av::av_encode_video(input = images, output = "Spiral.mp4")
 
 ### Para mais informações, dúvidas e/ou sugestões, e-mail para contato: pexcca.lamet@uenf.br
