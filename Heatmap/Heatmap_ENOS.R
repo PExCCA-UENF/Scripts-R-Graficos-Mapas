@@ -9,7 +9,6 @@
 #                  HEATMAP - EL NIÑO OSCILAÇÃO SUL (ENOS)                      #
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
-
 ## Para instalar e carregar as bibliotecas necessárias, use os comandos abaixo:
 for (p in c("tidyverse", "showtext", "ggplot2", "scales")) {
   if (!require(p, character.only = T)) {
@@ -19,7 +18,6 @@ for (p in c("tidyverse", "showtext", "ggplot2", "scales")) {
 }
 
 # Importação e organização dos dados -------------------------------------------
-
 ## Índice Oceânico Niño (Oceanic Niño Index – ONI).
 ## O ONI é definido pela média móvel trimestral da anomalia de temperatura da superfície do mar 
 ## para a região do Niño 3.4, por no mínimo, cinco meses consecutivos, onde a anomalia maior que
@@ -30,7 +28,6 @@ ONI <-
     file = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
     header = T
   )
-
 head(ONI)
 
 ONI <- ONI %>%
@@ -72,20 +69,16 @@ ONI <-
                     "JJA", "JAS", "ASO",
                     "SON", "OND", "NDJ"))
          )
-
 head(ONI, n = 12)
 
 # Fontes das Letras ------------------------------------------------------------
-
 fonte_l <- "Roboto Mono"
-
 font_add_google(
   name = fonte_l,
   family = fonte_l)
 showtext_auto()
 
 # Heatmap ----------------------------------------------------------------------
-
 ggplot(
   data = ONI %>% filter(YR >= 1997),
   mapping = aes(x = SEAS, y = YR, fill = ANOM2, label = ANOM)
