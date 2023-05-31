@@ -21,7 +21,7 @@ for (p in c("tidyverse", "showtext", "ggplot2", "scales")) {
 ## Índice Oceânico Niño (Oceanic Niño Index – ONI).
 ## O ONI é definido pela média móvel trimestral da anomalia de temperatura da superfície do mar 
 ## para a região do Niño 3.4, por no mínimo, cinco meses consecutivos, onde a anomalia maior que
-# 0,5°C está associado a El Niño e menor que -0,5°C está associado a La Niña.
+## 0,5°C está associado a El Niño e menor que -0,5°C está associado a La Niña.
 
 ONI <- 
   read.table(
@@ -136,6 +136,5 @@ ggsave(filename = "ONI.png",
        width = 1220, height = 1100, units = "px", 
        bg = "#faf7f2"
 )
-
 #------------------------https://linktr.ee/pexcca.lamet------------------------#
 
