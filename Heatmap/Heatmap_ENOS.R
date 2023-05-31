@@ -19,9 +19,11 @@ for (p in c("tidyverse", "showtext", "ggplot2")) {
 
 # Importação e organização dos dados -------------------------------------------
 ## Índice Oceânico Niño (Oceanic Niño Index – ONI).
-## O ONI é definido pela média móvel trimestral da anomalia de temperatura da superfície do mar 
-## para a região do Niño 3.4, por no mínimo, cinco meses consecutivos, onde a anomalia maior que
-## 0,5°C está associado a El Niño e menor que -0,5°C está associado a La Niña.
+## O ONI é definido pela média móvel de três meses das anomalias de TSM na região 
+## Niño 3.4, onde anomalias iguais ou maiores que 0,5°C estão associadas a El Niño  
+## e iguais ou menores que -0,5°C estão associadas a La Niña. As anomalias são coloridas  
+# em vermelho e azul quando o limite é atingido por no mínimo cinco valores consecutivos. 
+
 
 ONI <- 
   read.table(
@@ -62,13 +64,13 @@ ONI <-
   mutate(ANOM2 =
            if_else(is.na(Episódios), NA, ANOM)) %>%
   mutate(SEAS = 
-         factor(SEAS,
-                levels = 
-                  c("DJF", "JFM", "FMA",
-                    "MAM", "AMJ", "MJJ",
-                    "JJA", "JAS", "ASO",
-                    "SON", "OND", "NDJ"))
-         )
+           factor(SEAS,
+                  levels = 
+                    c("DJF", "JFM", "FMA",
+                      "MAM", "AMJ", "MJJ",
+                      "JJA", "JAS", "ASO",
+                      "SON", "OND", "NDJ"))
+  )
 head(ONI, n = 12)
 
 # Fontes das Letras ------------------------------------------------------------
@@ -111,7 +113,7 @@ ggplot(
     labels = c("La Niña", "Neutralidade","El Niño")) +
   labs(x = "", y = "", fill = "",
        title = "Índice Oceânico Niño (ONI)", 
-       subtitle = "Média móvel trimestral da anomalia de TSM da região Niño 3.4 (ºC)",
+       subtitle = "Média móvel trimestral das anomalias de TSM na região Niño 3.4 (ºC)",
        caption = "Fonte de dados: NCEP/NOAA") +
   theme_void() +
   theme(
@@ -137,4 +139,3 @@ ggsave(filename = "ONI.png",
        bg = "#faf7f2"
 )
 #------------------------https://linktr.ee/pexcca.lamet------------------------#
-
