@@ -24,7 +24,6 @@ for (p in c("tidyverse", "showtext", "ggplot2")) {
 ## e iguais ou menores que -0,5°C estão associadas a La Niña. As anomalias são coloridas  
 # em vermelho e azul quando o limite é atingido por no mínimo cinco valores consecutivos. 
 
-
 ONI <- 
   read.table(
     file = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
