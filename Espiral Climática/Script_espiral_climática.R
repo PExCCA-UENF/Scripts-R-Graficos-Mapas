@@ -1,15 +1,18 @@
-#======================================================================================
-# PROJETO DE EXTENSÃO "PROCESSAMENTO E ANÁLISE DE DADOS AMBIENTAIS COM R"
-# E-mail: pexcca.lamet@uenf.br
-#======================================================================================
+#==============================================================================#
+#          EXTENSÃO UNIVERSITÁRIA EM CIÊNCIAS CLIMÁTICAS E AMBIENTAIS          #
+#          PROJETO "PROCESSAMENTO E ANÁLISE DE DADOS AMBIENTAIS COM R"         #
+#                        Contato: pexcca.lamet@uenf.br                         #
+#                       https://linktr.ee/pexcca.lamet                         #
+#==============================================================================#
 
-#---------------------------------- ESPIRAL CLIMÁTICA ---------------------------------
-# Elaboração: Nícolas C. Nogueira
-# Revisão: Profa. Eliane B. Santos
-# Atualização: 10/12/2022
-#--------------------------------------------------------------------------------------
+#---------------------------------- ESPIRAL CLIMÁTICA -------------------------#
+#                      Elaborado por Nícolas C. Nogueira                       #
+#                    Revisado pela Profa. Eliane B. Santos                     #
+#                      Script Atualizado em 10/12/2022                         #
+#------------------------------------------------------------------------------#
 
-### Para instalar as bibliotecas necessárias, use os comandos abaixo:
+# Bibliotecas (Pacotes) -------------------------------------------------------#
+## Para instalar as bibliotecas necessárias, use os comandos abaixo:
 for (p in c("magrittr", "tidyverse", "lubridate",
             "readxl", "ggthemes", "av")) {
   if (!require(p, character.only = T)) {
@@ -18,8 +21,7 @@ for (p in c("magrittr", "tidyverse", "lubridate",
   library(p, quietly = T, character.only = T)
 }
 
-### Importação e organização dos dados.
-
+# Importação e organização dos dados ------------------------------------------#
 # Vamos utilizar os dados mensais de Campos-RJ (Código 83698) obtidos no
 # Banco de Dados Meteorológicos para Ensino e Pesquisa (BDMEP) do INMET.
 # O BDMEP/INMET disponibiliza os dados no link: https://bdmep.inmet.gov.br/
@@ -65,8 +67,7 @@ dados.anomalias <- data.frame(Ano = as.numeric(dados$Ano),
                     Tmc.normal = Tmc.NC$Tmc,
                     Tmc.anomalias = dados$Tmc - Tmc.NC$Tmc)
 
-### Visualização - Espiral climática ###
-
+# Visualização - Espiral climática---------------------------------------------#
 # Primeiro vamos criar uma conexão dezembro-janeiro.
 # Para isso, vamos criar um mês "zero" em cada ano, que representa o mês de dezembro do ano anterior.
 
@@ -157,4 +158,4 @@ images <- list.files(pattern = "Spiral_Frame_",
 
 av::av_encode_video(input = images, output = "Spiral.mp4")
 
-### Para mais informações, dúvidas e/ou sugestões, e-mail para contato: pexcca.lamet@uenf.br
+#------------------------https://linktr.ee/pexcca.lamet------------------------#
