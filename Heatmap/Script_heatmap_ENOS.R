@@ -20,7 +20,7 @@ for (p in c("tidyverse", "showtext", "ggplot2")) {
   library(p, quietly = T, character.only = T)
 }
 
-# Importação e organização dos dados -------------------------------------------
+# Importação e organização dos dados ------------------------------------------#
 ## Índice Oceânico Niño (Oceanic Niño Index – ONI).
 ## O ONI é definido pela média móvel de três meses das anomalias de TSM na região 
 ## Niño 3.4, onde anomalias iguais ou maiores que 0,5°C estão associadas a El Niño  
@@ -75,14 +75,14 @@ ONI <-
   )
 head(ONI, n = 12)
 
-# Fontes das Letras ------------------------------------------------------------
+# Fontes das Letras -----------------------------------------------------------#
 fonte_l <- "Roboto Mono"
 font_add_google(
   name = fonte_l,
   family = fonte_l)
 showtext_auto()
 
-# Heatmap ----------------------------------------------------------------------
+# Heatmap ---------------------------------------------------------------------#
 ggplot(
   data = ONI %>% filter(YR >= 1997),
   mapping = aes(x = SEAS, y = YR, fill = ANOM2, label = ANOM)
