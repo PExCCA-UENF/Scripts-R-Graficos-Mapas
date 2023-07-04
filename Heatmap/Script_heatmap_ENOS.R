@@ -3,10 +3,13 @@
 #          PROJETO "PROCESSAMENTO E ANÁLISE DE DADOS AMBIENTAIS COM R"         #
 #                        Contato: pexcca.lamet@uenf.br                         #
 #                       https://linktr.ee/pexcca.lamet                         #
-#                       Script Atualizado em 31/05/2023                        #
 #==============================================================================#
 
-#                  HEATMAP - EL NIÑO OSCILAÇÃO SUL (ENOS)                      #
+#--------------------HEATMAP - EL NIÑO OSCILAÇÃO SUL (ENOS)--------------------#
+#                      Elaborado por Nícolas C. Nogueira                       #
+#                    Revisado pela Profa. Eliane B. Santos                     #
+#                      Script Atualizado em 31/05/2023                         #
+#------------------------------------------------------------------------------#
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
 ## Para instalar e carregar as bibliotecas necessárias, use os comandos abaixo:
