@@ -5,7 +5,7 @@
 #                       https://linktr.ee/pexcca.lamet                         #
 #==============================================================================#
 
-#---------------------------------- ESPIRAL CLIMÁTICA -------------------------#
+#------------------------------ESPIRAL CLIMÁTICA ------------------------------#
 #                      Elaborado por Nícolas C. Nogueira                       #
 #                    Revisado pela Profa. Eliane B. Santos                     #
 #                      Script Atualizado em 10/12/2022                         #
