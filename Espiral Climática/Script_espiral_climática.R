@@ -6,8 +6,8 @@
 #==============================================================================#
 
 #------------------------------ESPIRAL CLIMÁTICA ------------------------------#
-#                      Elaborado por Nícolas C. Nogueira                       #
-#                    Revisado pela Profa. Eliane B. Santos                     #
+#                    Elaboração: Nícolas Chenquel Nogueira                     #
+#                      Revisão: Profa. Eliane B. Santos                        #
 #                      Script Atualizado em 10/12/2022                         #
 #------------------------------------------------------------------------------#
 
