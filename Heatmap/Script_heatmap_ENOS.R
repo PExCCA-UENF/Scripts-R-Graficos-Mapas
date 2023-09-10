@@ -6,8 +6,8 @@
 #==============================================================================#
 
 #--------------------HEATMAP - EL NIÑO OSCILAÇÃO SUL (ENOS)--------------------#
-#                      Elaborado por Nícolas C. Nogueira                       #
-#                    Revisado pela Profa. Eliane B. Santos                     #
+#                    Elaboração: Nícolas Chenquel Nogueira                     #
+#                      Revisão: Profa. Eliane B. Santos                        #
 #                      Script Atualizado em 31/05/2023                         #
 #------------------------------------------------------------------------------#
 
