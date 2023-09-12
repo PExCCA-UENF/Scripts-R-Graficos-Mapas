@@ -82,21 +82,21 @@ mapa <-
     fill = '#FFFFFF',
     color = 'gray30',
     size = 7,
-    alpha = 0.2
+    alpha = 0.3
   ) +
   geom_label(
     mapping = aes(x = -55, y = -10, label = 'Brasil'),
     fill = '#FFFFFF',
     color = 'gray30',
     size = 7,
-    alpha = 0.2
+    alpha = 0.3
   ) +
   geom_label(
     mapping = aes(x = -40, y = -22, label = 'Mata Atlântica'),
     fill = '#FFFFFF',
     color = 'gray30',
     size = 7,
-    alpha = 0.2
+    alpha = 0.3
   ) +
   # Informações das Coordenadas Geográficas:
   geom_label(
