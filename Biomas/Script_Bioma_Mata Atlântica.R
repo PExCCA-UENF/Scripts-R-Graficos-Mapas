@@ -13,7 +13,6 @@
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
 ## Para instalar e carregar as bibliotecas necessárias, use os comandos abaixo:
-
 for (p in c('sf', 'geobr', 'ggspatial', 'tidyverse', 'magick')) {
   if (!require(p, character.only = T)) {
     install.packages(p, character = T)
@@ -48,7 +47,6 @@ Mata_atlan <-
   filter(name_biome == 'Mata Atlântica')
 
 # Produção do Mapa -------------------------------------------------------------
-
 mapa <-
   ggplot() +
   # América do Sul:
@@ -174,7 +172,7 @@ ggsave(filename = 'results/Mapa_Mata_Atlantica.png',
        scale = 3)
 
 # # Acrescentando imagens no mapa ------------------------------------------------
-# 
+ 
 # # Importando imagens:
 # mapa    <- image_read('results/Mapa_Mata_Atlantica.png')
 # qrcode  <- image_read('images/qrcode.jpeg')
