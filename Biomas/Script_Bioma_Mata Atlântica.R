@@ -108,7 +108,7 @@ mapa <-
   ) +
   # Título
   labs(
-    title = 'Bioma Mata Atlântica - Brasil',
+    title = 'BIOMA MATA ATLÂNTICA - BRASIL',
     # caption = info,
     x = NULL,
     y = NULL
@@ -118,7 +118,7 @@ mapa <-
     plot.title =
       element_text(
         face = 'bold',
-        size = 25,
+        size = 20,
         lineheight = 0.9,
         hjust = 0.5
       ),
