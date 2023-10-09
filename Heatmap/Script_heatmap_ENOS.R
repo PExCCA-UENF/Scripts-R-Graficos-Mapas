@@ -13,7 +13,7 @@
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
 ## Para instalar e carregar as bibliotecas necessárias, use os comandos abaixo:
-for (p in c("tidyverse", "showtext",)) {
+for (p in c("tidyverse", "showtext")) {
   if (!require(p, character.only = T)) {
     install.packages(p, character = T)
   }
