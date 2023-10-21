@@ -8,7 +8,7 @@
 #--------------------------MAPA - BIOMA MATA ATLÂNTICA-------------------------#
 #                       Elaboração: Camila Totti Andrade                       #
 #           Revisão: Nícolas C. Nogueira e Profa. Eliane B. Santos             #
-#                      Script Atualizado em 12/09/2023                         #
+#                      Script Atualizado em 20/10/2023                         #
 #------------------------------------------------------------------------------#
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
@@ -25,19 +25,19 @@ for (p in c('sf', 'geobr', 'ggspatial', 'tidyverse', 'magick')) {
 # Nacional de Águas e Saneamento Básico (ANA). 
 
 # Primeiro, vamor criar uma pasta denominada 'data':
-if(!dir.exists('data/')){
-  dir.create('data')
+if(!dir.exists('Biomas/')){
+  dir.create('Biomas')
 }
 
 # Agora, vamos fazer o download do arquivo zipado:
 download.file(url = 'https://metadados.snirh.gov.br/geonetwork/srv/api/records/7cfd53c4-b4e1-4aba-a79b-857a19649df6/attachments/GEOFT_PAIS.zip',
-              destfile = 'data/America.zip')
+              destfile = 'Biomas/America.zip')
 
 # Extraindo o arquivo zipado:
-unzip(zipfile = 'data/America.zip', exdir = 'data/')   
+unzip(zipfile = 'Biomas/America.zip', exdir = 'Biomas/')   
 
 #  Leitura do arquivo .shp:
-America <- read_sf('data/GEOFT_PAIS/GEOFT_PAIS.shp')
+America <- read_sf('Biomas/GEOFT_PAIS/GEOFT_PAIS.shp')
 
 # Para o mapa do Brasil e do bioma Mata Atlântica, vamos usar o pacote 'geobr':
 BR <- geobr::read_country(year = 2020)
@@ -161,42 +161,13 @@ mapa <-
       line_col = 'grey30'
     )
   )
-mapa
- 
+
 # Exportando o Mapa ------------------------------------------------------------
-ggsave(filename = 'results/Mapa_Mata_Atlantica.png',
+ggsave(filename = 'Biomas/Mapa_Mata_Atlantica.png',
        plot = mapa,
        width = 1080,
        height = 1080,
        units = 'px',
        scale = 3)
-
-# # Acrescentando imagens no mapa ------------------------------------------------
- 
-# # Importando imagens:
-# mapa    <- image_read('results/Mapa_Mata_Atlantica.png')
-# qrcode  <- image_read('images/qrcode.jpeg')
-# pexcca  <- image_read('images/pexcca.jpeg')
-# proambr <- image_read('images/proambr.jpeg')
-# 
-# # Definindo área abaixo do mapa para a primeira imagem:
-# qrcode1 <-
-#   qrcode  %>%
-#   image_scale(100) %>%
-#   image_border('white', '600x10')
-# 
-# # Inserindo a primeira imagem no mapa:
-# mapai <- image_append(image_scale(c(mapa, qrcode1), '3240'),
-#                       stack = TRUE)
-# mapai
-# 
-# # Inserindo as outras imagens no mapa:
-# mapai %>%
-#   image_composite(., image_scale(pexcca, '250'),
-#                   gravity = 'Southwest', offset = '+1200+20') %>%
-#   image_composite(., image_scale(proambr, '250'),
-#                   gravity = 'Southwest', offset = '+1750+20') %>%
-#   # Exportando a imagem.
-#   image_write('results/Mapa_Mata_Atlantica_Anotado.png')
 
 #------------------------https://linktr.ee/pexcca.lamet------------------------#
