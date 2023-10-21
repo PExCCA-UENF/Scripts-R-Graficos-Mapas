@@ -24,7 +24,7 @@ for (p in c('sf', 'geobr', 'ggspatial', 'tidyverse', 'magick')) {
 # Vamos fazer o donwload de uma base de dados do Catálogo de Metadados da Agência
 # Nacional de Águas e Saneamento Básico (ANA). 
 
-# Primeiro, vamor criar uma pasta denominada 'data':
+# Primeiro, vamor criar uma pasta denominada 'Biomas':
 if(!dir.exists('Biomas/')){
   dir.create('Biomas')
 }
