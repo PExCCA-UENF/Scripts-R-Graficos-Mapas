@@ -109,7 +109,6 @@ mapa <-
   # Título
   labs(
     title = 'BIOMA MATA ATLÂNTICA - BRASIL',
-    # caption = info,
     x = NULL,
     y = NULL
   ) +
