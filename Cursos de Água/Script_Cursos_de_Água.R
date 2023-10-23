@@ -81,7 +81,6 @@ font_add_google(
 showtext_auto()
 
 # Produção do Mapa ------------------------------------------------------------#
-
 mapa <-
   ggplot() +
   # América do Sul:
@@ -137,7 +136,6 @@ mapa <-
     style = north_arrow_fancy_orienteering(    
       fill = c('#A9A98F', '#F2F2E6'),             
       line_col = 'grey30'))
-mapa
 
 # Exportando o Mapa -----------------------------------------------------------#
 ggsave(filename = 'Cursos de Água/Mapa_CursosÁgua_Brasil.png',
