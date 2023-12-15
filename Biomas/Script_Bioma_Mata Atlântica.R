@@ -101,7 +101,7 @@ mapa <-
   # Informações das Coordenadas Geográficas:
   geom_label(
     mapping = aes(x = -68, y = -32),
-    label = 'DATUM SIRGAS 2000 \n Sistema de Coordenadas Geográficas \n Fonte: IBGE (2019; 2020); ANA (2010) \n Elaborado por Camila Totti (@proamb.r)', 
+    label = 'DATUM SIRGAS 2000 \n Sistema de Coordenadas Geográficas \n Fonte: IBGE (2019; 2020); ANA (2010) \n Elaborado por @proamb.r', 
     fill = '#FFFFFF',
     size = 4,
     alpha = 0.5
