@@ -97,7 +97,7 @@ mapa <-
   geom_sf(data = BR, fill = NA, color='gray20', linewidth = 1.2) +
   # Título e Informações das Coordenadas Geográficas: 
   labs(title = "PRINCIPAIS CURSOS D'ÁGUA DO BRASIL",
-       caption = 'Sistema de Coordenadas Geográficas | DATUM SIRGAS 2000 | Fonte: IBGE (2020); ANA (2013) | Elaboração: Camila Totti (@proamb.r)',
+       caption = 'Sistema de Coordenadas Geográficas | DATUM SIRGAS 2000 | Fonte: IBGE (2020); ANA (2013) | Elaborado por @proamb.r',
        x = NULL,
        y = NULL)+
   coord_sf(xlim = c(-73, -35),
