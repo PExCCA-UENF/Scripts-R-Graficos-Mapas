@@ -123,7 +123,7 @@ ggplot(
     # plot.background = element_rect(fill = "#faf7f2"),
     plot.title = element_text(hjust = 0.5, vjust = 1, size = 26, face = "bold"),
     plot.subtitle = element_text(hjust = 0.5, vjust = 4, size = 15),
-    plot.caption = element_text(hjust = 0.99, vjust = 26, size = 14, color = "#53738c", face = "italic"),
+    plot.caption = element_text(hjust = 0.99, vjust = 25, size = 14, color = "#53738c", face = "italic"),
     axis.text = element_text(size = 18),
     axis.text.x = element_text(face = "italic", vjust = -5),
     axis.text.y = element_text(margin = margin(0, 0, 0, 5)),
@@ -131,13 +131,13 @@ ggplot(
     legend.text = element_text(size = 12),
     legend.position = "bottom",
     legend.justification = "right",
-    legend.box.margin = margin(-10, 5, 0, 0),
+    legend.box.margin = margin(-3, 5, 0, 0),
     legend.spacing.x = unit(0.1, 'cm'),
   ) +
   coord_fixed(ratio = 1/3)
 
 ggsave(filename = "ONI.png",
-       width = 1220, height = 1100, units = "px", 
+       width = 1080, height = 1080, units = "px", 
        bg = "#faf7f2"
 )
 #------------------------https://linktr.ee/pexcca.lamet------------------------#
