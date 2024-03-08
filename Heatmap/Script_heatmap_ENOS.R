@@ -8,7 +8,7 @@
 #--------------------HEATMAP - EL NIÑO OSCILAÇÃO SUL (ENOS)--------------------#
 #                    Elaboração: Nícolas Chenquel Nogueira                     #
 #                      Revisão: Profa. Eliane B. Santos                        #
-#                      Script Atualizado em 24/02/2024                         #
+#                      Script Atualizado em 08/03/2024                         #
 #------------------------------------------------------------------------------#
 
 # Bibliotecas (Pacotes) --------------------------------------------------------
@@ -75,6 +75,8 @@ ONI <-
   )
 head(ONI, n = 12)
 
+Ano_Atual <- max(ONI$YR)
+
 # Fontes das Letras -----------------------------------------------------------#
 fonte_l <- "Roboto Mono"
 font_add_google(
@@ -100,7 +102,7 @@ ggplot(
     position = "top"
   ) +
   scale_y_continuous(
-    breaks = 1997:2023,
+    breaks = 1997:Ano_Atual,
     trans = "reverse"
   ) +
   scale_fill_gradient2(
@@ -124,6 +126,7 @@ ggplot(
     plot.title = element_text(hjust = 0.5, vjust = 1, size = 26, face = "bold"),
     plot.subtitle = element_text(hjust = 0.5, vjust = 4, size = 15),
     plot.caption = element_text(hjust = 0.99, vjust = 25, size = 14, color = "#53738c", face = "italic"),
+    plot.margin = unit(c(3, 3, 3, 3), units = "mm"),
     axis.text = element_text(size = 18),
     axis.text.x = element_text(face = "italic", vjust = -5),
     axis.text.y = element_text(margin = margin(0, 0, 0, 5)),
