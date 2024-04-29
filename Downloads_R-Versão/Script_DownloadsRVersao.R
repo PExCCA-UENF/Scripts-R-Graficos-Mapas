@@ -440,7 +440,7 @@ pl <-
       hjust = 0.03,
       halign = 0,
       fill = NA,
-      label = "Os registros de downloads do programa R do CRAN (Comprehensive R Archive Network) foram coletados por métodos automatizados e utilizados para calcular o total mensal de downloads. Apenas as versões principais do R foram consideradas. Ressaltamos que o número de downloads não representa um quantitativo de usuários ativos diretamente, mas pode ser um bom indicativo do crescimento da linguagem."
+      label = "Os registros de downloads do programa R do CRAN (Comprehensive R Archive Network), foram coletados por métodos automatizados e utilizados para calcular o total mensal de downloads. Apenas as versões principais do R foram consideradas. Ressaltamos que o número de downloads não representa um quantitativo de usuários ativos diretamente, mas pode ser um bom indicativo do crescimento da linguagem."
     ),
     size = 25,
     inherit.aes = F,
